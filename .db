@@ -1,0 +1,514 @@
+CREATE DATABASE IF NOT EXISTS paramex;
+USE paramex;
+
+CREATE TABLE company (
+    id                          INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    name                        VARCHAR(255),                            
+    company_registration_number VARCHAR(255),                            
+    tax_identifier              VARCHAR(255),                            
+    trade_register_number       VARCHAR(255),                            
+    business_license_number     VARCHAR(255),                            
+    phone_1                     VARCHAR(255),                            
+    phone_2                     VARCHAR(255),                            
+    website                     VARCHAR(255),                            
+    address                     TEXT,                                    
+    risk_rate                   FLOAT                                    
+);
+
+CREATE TABLE city (
+    id   INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    name VARCHAR(255)                             
+);
+
+CREATE TABLE employee (
+    id              INT NOT NULL AUTO_INCREMENT, 
+    city_id         INT NOT NULL,                
+
+    designation     VARCHAR(255),                
+    position_type   ENUM(                        
+                       'administrator', 
+                       'manager', 
+                       'accountant', 
+                       'storekeeper', 
+                       'internal_sales_representative', 
+                       'external_sales_representative'
+                    ),
+    password        VARCHAR(255),                
+    phone_1         VARCHAR(255),                
+    phone_2         VARCHAR(255),                
+    address         TEXT,                        
+    salary          DOUBLE,                      
+    hire_date       DATE,                        
+
+    is_archived     BOOLEAN DEFAULT 0,           
+    archive_date    DATE,                        
+    is_deleted      BOOLEAN DEFAULT 0,           
+    deletion_date   DATE,                        
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (city_id) REFERENCES city(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE roles (
+    id                          INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    employee_id                 INT NOT NULL,                            
+
+    can_add_simple_purchase     BOOLEAN,                                 
+    can_modify_simple_purchase  BOOLEAN,                                 
+    can_delete_simple_purchase  BOOLEAN,                                 
+    can_add_delivery            BOOLEAN,                                 
+    can_modify_delivery         BOOLEAN,                                 
+    can_delete_delivery         BOOLEAN,                                 
+    can_add_invoice             BOOLEAN,                                 
+    can_modify_invoice          BOOLEAN,                                 
+    can_delete_invoice          BOOLEAN,                                 
+
+    FOREIGN KEY (employee_id) REFERENCES employee(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE absences (
+    id             INT NOT NULL AUTO_INCREMENT, 
+    employee_id    INT,                         
+
+    absence_date   DATE,                        
+    morning        BOOLEAN,                     
+    afternoon      BOOLEAN,                     
+    penalty        FLOAT,                       
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (employee_id) REFERENCES employee(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE accountant (
+    id                            INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    designation                   VARCHAR(255),                            
+    code                          VARCHAR(255),                            
+    account_classification_number VARCHAR(255)                             
+);
+
+CREATE TABLE supplier (
+    id                          INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    accountant_id               INT NOT NULL,                            
+    city_id                     INT NOT NULL,                            
+
+    name                        VARCHAR(255),                            
+    company_registration_number VARCHAR(255),                            
+    phone_1                     VARCHAR(255),                            
+    phone_2                     VARCHAR(255),                            
+    address                     TEXT,                                    
+    email                       VARCHAR(255),                            
+
+    is_archived                 BOOLEAN DEFAULT 0,                       
+    archive_date                DATE,                                    
+    is_deleted                  BOOLEAN DEFAULT 0,                       
+    deletion_date               DATE,                                    
+
+    FOREIGN KEY (accountant_id) REFERENCES accountant(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (city_id)       REFERENCES city(id)       ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE check (
+    id           INT NOT NULL AUTO_INCREMENT, 
+    supplier_id  INT,                         
+
+    number       VARCHAR(255),                
+    amount       DOUBLE,                      
+    issue_date   DATE,                        
+    is_settled   BOOLEAN DEFAULT 0,           
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE bonus (
+    id           INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    due          DOUBLE,                                  
+    auxiliary    DOUBLE,                                  
+    total_amount DOUBLE                                   
+);
+
+CREATE TABLE product (
+    id                       INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    designation              VARCHAR(255),                            
+    warehouse_stock_quantity INT,                                     
+    billed_stock_quantity    INT,                                     
+    total_stock_quantity     INT,                                     
+
+    purchase_price           DOUBLE,                                  
+    sale_price               DOUBLE,                                  
+    value_added_tax          DOUBLE,                                  
+    profit                   DOUBLE,                                  
+    bonus                    DOUBLE,                                  
+    commercial_price         DOUBLE,                                  
+    discount_1               DOUBLE,                                  
+    quantity_1               INT,                                     
+    sale_price_1             DOUBLE,                                  
+    discount_2               DOUBLE,                                  
+    sale_price_2             DOUBLE,                                  
+    quantity_2               INT,                                     
+    discount_3               DOUBLE,                                  
+    quantity_3               INT,                                     
+    sale_price_3             DOUBLE,                                  
+    discount_4               DOUBLE,                                  
+    quantity_4               INT,                                     
+    sale_price_4             DOUBLE,                                  
+    auxiliary_1              INT,                                     
+    due_1                    INT,                                     
+    bonus_1                  INT,                                     
+    auxiliary_2              INT,                                     
+    due_2                    INT,                                     
+    bonus_2                  INT,                                     
+    auxiliary_3              INT,                                     
+    due_3                    INT,                                     
+    bonus_3                  INT,                                     
+    auxiliary_4              INT,                                     
+    due_4                    INT,                                     
+    bonus_4                  INT,                                     
+
+    is_archived              BOOLEAN DEFAULT 0,                       
+    archive_date             DATE,                                    
+    is_deleted               BOOLEAN DEFAULT 0,                       
+    deletion_date            DATE                                     
+);
+
+CREATE TABLE product_supplier (
+    product_id   INT NOT NULL, 
+    supplier_id  INT NOT NULL, 
+
+    PRIMARY KEY (product_id, supplier_id),
+    FOREIGN KEY (product_id)  REFERENCES product(id)   ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE storage (
+    id           INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    storage_date DATE                                     
+);
+
+CREATE TABLE storage_items (
+    storage_id INT NOT NULL, 
+    product_id INT NOT NULL, 
+
+    quantity   INT,          
+
+    PRIMARY KEY (storage_id, product_id),
+    FOREIGN KEY (storage_id) REFERENCES storage(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (product_id) REFERENCES product(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE repertoire (
+    id                          INT NOT NULL AUTO_INCREMENT, 
+    city_id                     INT NOT NULL,                
+
+    client_type                 ENUM (                       
+                                    'pharmacy', 
+                                    'reseller', 
+                                    'transport'
+                                ),
+    name                        VARCHAR(255),                
+    company_registration_number VARCHAR(255),                
+    phone_1                     VARCHAR(255),                
+    phone_1_owner               VARCHAR(255),                
+    phone_2                     VARCHAR(255),                
+    phone_2_owner               VARCHAR(255),                
+    phone_3                     VARCHAR(255),                
+    phone_3_owner               VARCHAR(255),                
+    address                     TEXT,                        
+    comment                     TEXT,                        
+    purchase_count              INT,                         
+
+    is_archived                 BOOLEAN DEFAULT 0,           
+    archive_date                DATE,                        
+    is_deleted                  BOOLEAN DEFAULT 0,           
+    deletion_date               DATE,                        
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (city_id) REFERENCES city(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE foreign_purchase (
+    id                           INT NOT NULL AUTO_INCREMENT, 
+    supplier_id                  INT,                         
+
+    invoice_number               VARCHAR(255),                
+    invoice_date                 DATE,                        
+    invoice_amount               DOUBLE,                      
+    invoice_currency             ENUM('USD','EUR'),           
+    international_transport_cost DOUBLE,                      
+    domestic_transport_cost      DOUBLE,                      
+    transit_fees                 DOUBLE,                      
+    warehousing_fees             DOUBLE,                      
+    customs_fees                 DOUBLE,                      
+    payment_1_amount             DOUBLE,                      
+    payment_1_date               DATE,                        
+    payment_2_amount             DOUBLE,                      
+    payment_2_date               DATE,                        
+    payment_3_amount             DOUBLE,                      
+    payment_3_date               DATE,                        
+    amount_paid                  DOUBLE                       
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE invoiced_purchase (
+    id                    INT NOT NULL AUTO_INCREMENT,                   
+    supplier_id           INT,                                           
+
+    invoice_number        VARCHAR(255),                                  
+    transaction_date      DATE,                                          
+    settlement_date       DATE,                                          
+    is_settled            BOOLEAN DEFAULT 0,                             
+    check_number          VARCHAR(255),                                  
+    tax_rate_7            INT CHECK (tax_rate_7 IN (7,10,12,13,14,20)),  
+    excluding_tax_7       DOUBLE,                                        
+    value_added_tax_7     DOUBLE,                                        
+    tax_included_7        DOUBLE,                                        
+    tax_rate_10           INT CHECK (tax_rate_10 IN (7,10,12,13,14,20)), 
+    excluding_tax_10      DOUBLE,                                        
+    value_added_tax_10    DOUBLE,                                        
+    tax_included_10       DOUBLE,                                        
+    tax_rate_12           INT CHECK (tax_rate_12 IN (7,10,12,13,14,20)), 
+    excluding_tax_12      DOUBLE,                                        
+    value_added_tax_12    DOUBLE,                                        
+    tax_included_12       DOUBLE,                                        
+    tax_rate_13           INT CHECK (tax_rate_13 IN (7,10,12,13,14,20)), 
+    excluding_tax_13      DOUBLE,                                        
+    value_added_tax_13    DOUBLE,                                        
+    tax_included_13       DOUBLE,                                        
+    tax_rate_14           INT CHECK (tax_rate_14 IN (7,10,12,13,14,20)), 
+    excluding_tax_14      DOUBLE,                                        
+    value_added_tax_14    DOUBLE,                                        
+    tax_included_14       DOUBLE,                                        
+    tax_rate_20           INT CHECK (tax_rate_20 IN (7,10,12,13,14,20)), 
+    excluding_tax_20      DOUBLE,                                        
+    value_added_tax_20    DOUBLE,                                        
+    tax_included_20       DOUBLE,                                        
+    total_excluding_tax   DOUBLE,                                        
+    total_value_added_tax DOUBLE,                                        
+    total_tax_included    DOUBLE,                                        
+    total                 DOUBLE,                                        
+    is_calculated         BOOLEAN DEFAULT 0,                             
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE simple_purchase (
+    id               INT NOT NULL AUTO_INCREMENT, 
+    supplier_id      INT,                         
+
+    code             VARCHAR(255),                
+    transaction_date DATE,                        
+    issue_date       DATE,                        
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE merchandise (
+    id                   INT NOT NULL AUTO_INCREMENT, 
+    foreign_purchase_id  INT,                         
+    invoiced_purchase_id INT,                         
+    simple_purchase_id   INT,                         
+    product_id           INT NOT NULL,                
+
+    purchase_type        ENUM(                        
+                            'imported',
+                            'invoiced',
+                            'warehouse'
+                         ),
+    quantity             INT,                         
+    free_unit            INT,                         
+    price                DOUBLE,                      
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (foreign_purchase_id) REFERENCES foreign_purchase(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (invoice_purchase_id) REFERENCES invoice_purchase(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (simple_purchase_id)  REFERENCES simple_purchase(id)  ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (product_id)          REFERENCES product(id)          ON UPDATE CASCADE ON DELETE RESTRICT,
+
+    UNIQUE (foreign_purchase_id, product_id), 
+    UNIQUE (invoice_purchase_id, product_id), 
+    UNIQUE (simple_purchase_id , product_id),
+
+    CHECK (
+           (foreign_purchase_id IS NOT NULL AND invoice_purchase_id IS NULL     AND simple_purchase_id IS     NULL)
+        OR (foreign_purchase_id IS NULL     AND invoice_purchase_id IS NOT NULL AND simple_purchase_id IS     NULL)
+        OR (foreign_purchase_id IS NULL     AND invoice_purchase_id IS NULL     AND simple_purchase_id IS NOT NULL)
+    )
+);
+
+CREATE TABLE delivery (
+    id                     INT NOT NULL AUTO_INCREMENT, 
+    repertoire_id          INT,                         
+    employee_id            INT,                         
+
+    code                   VARCHAR(255),                
+    issue_date             DATE,                        
+    delivery_date          DATE,                        
+    transport_code         VARCHAR(255),                
+    total_amount           DOUBLE,                      
+    remarks                TEXT,                        
+    is_settled             BOOLEAN,                     
+    general_payment_method ENUM(                        
+                                'check',
+                                'transfer',
+                                'draft',
+                                'cash'
+                           ),
+
+    payment_1_amount       DOUBLE,                      
+    payment_1_date         DATE,                        
+    payment_1_check_number VARCHAR(255),                
+    payment_1_method       ENUM(                        
+                                'check',
+                                'transfer',
+                                'draft',
+                                'cash'
+                           ),
+
+    payment_2_amount       DOUBLE,                      
+    payment_2_date         DATE,                        
+    payment_2_method       ENUM(                        
+                                'check',
+                                'transfer',
+                                'draft',
+                                'cash'
+                           ),
+    payment_2_check_number VARCHAR(255),                
+
+    payment_3_amount       DOUBLE,                      
+    payment_3_date         DATE,                        
+    payment_3_check_number VARCHAR(255),                
+    payment_3_method       ENUM(                        
+                                'check',
+                                'transfer',
+                                'draft',
+                                'cash'
+                           ),
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (repertoire_id) REFERENCES repertoire(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (employee_id)   REFERENCES employee(id)   ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE invoice (
+    id                         INT NOT NULL AUTO_INCREMENT, 
+    repertoire_id              INT,                         
+
+    number                     VARCHAR(255),                
+    invoice_date               DATE,                        
+    issue_date                 DATE,                        
+    total_amount               DOUBLE,                      
+    remarks                    TEXT,                        
+
+    payment_1_amount           DOUBLE,                      
+    payment_1_date             DATE,                        
+    payment_1_reference_number VARCHAR(255),                
+    payment_1_check_number     VARCHAR(255),                
+    payment_1_method           ENUM(                        
+                                    'check',
+                                    'transfer',
+                                    'draft',
+                                    'cash'
+                               ),
+
+    payment_2_amount           DOUBLE,                      
+    payment_2_date             DATE,                        
+    payment_2_reference_number VARCHAR(255),                
+    payment_2_check_number     VARCHAR(255),                
+    payment_2_method           ENUM(                        
+                                   'cheque',
+                                   'virement',
+                                   'trait',
+                                   'espece'
+                               ),
+
+    payment_3_amount           DOUBLE,                      
+    payment_3_date             DATE,                        
+    payment_3_reference_number VARCHAR(255),                
+    payment_3_check_number     VARCHAR(255),                
+    payment_3_method           ENUM(                        
+                                   'cheque',
+                                   'virement',
+                                   'trait',
+                                   'espece'
+                               ),
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (repertoire_id) REFERENCES repertoire(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE dispatch_note (
+    id            INT NOT NULL AUTO_INCREMENT, 
+    employee_id   INT,                         
+
+    code          VARCHAR(256),                
+    dispatch_date DATE,                        
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (employee_id) REFERENCES employee(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE transaction_item (
+    id                 INT NOT NULL AUTO_INCREMENT, 
+    delivery_id        INT,                         
+    invoice_id         INT,                         
+    dispatch_note_id   INT,                         
+    product_id         INT NOT NULL,                
+
+    item_type          ENUM (
+                            'delivery', 
+                            'invoice', 
+                            'dispatch_note'
+                       ),
+    quantity           INT,                         
+    price              DOUBLE,                      
+    applied_discount   FLOAT,                       
+    amount             DOUBLE,                      
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (delivery_id)      REFERENCES delivery(id)     ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (invoice_id)       REFERENCES invoices(id)       ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (dispatch_note_id) REFERENCES dispatch_notes(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (product_id)       REFERENCES product(id)        ON UPDATE CASCADE ON DELETE RESTRICT,
+
+    UNIQUE (delivery_id     , product_id),
+    UNIQUE (invoice_id      , product_id),
+    UNIQUE (dispatch_note_id, product_id),
+
+    CHECK (
+            (delivery_id IS NOT NULL AND invoice_id IS NULL     AND dispatch_note_id IS     NULL)
+        OR  (delivery_id IS NULL     AND invoice_id IS NOT NULL AND dispatch_note_id IS     NULL)
+        OR  (delivery_id IS NULL     AND invoice_id IS NULL     AND dispatch_note_id IS NOT NULL)
+    )
+);
+
+CREATE TABLE vat_snapshot (
+    id                   INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    start_date           DATE,                                    
+    end_date             DATE,                                    
+    previous_vat_amount  DOUBLE,                                  
+    purchase_vat_amount  DOUBLE,                                  
+    sales_vat_amount     DOUBLE,                                  
+    total                DOUBLE                                   
+);
+
+CREATE TABLE pay_slip (
+    id                    INT NOT NULL AUTO_INCREMENT, 
+    employee_id           INT,                         
+
+    start_date            DATE,                        
+    end_date              DATE,                        
+    total_sold_amount     DOUBLE,                      
+    fixed                 VARCHAR(255),                
+    cnss                  VARCHAR(255),                
+    bonus                 DOUBLE,                      
+    product_bonus         DOUBLE,                      
+    salary                DOUBLE,                      
+    expenses              DOUBLE,                      
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (employee_id) REFERENCES employee(id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
