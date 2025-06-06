@@ -68,7 +68,7 @@ CREATE TABLE roles (
 
 CREATE TABLE absences (
     id             INT NOT NULL AUTO_INCREMENT, 
-    employee_id    INT,                         
+    employee_id    INT NOT NULL,                         
 
     absence_date   DATE,                        
     morning        BOOLEAN,                     
@@ -107,9 +107,9 @@ CREATE TABLE supplier (
     FOREIGN KEY (city_id)       REFERENCES city(id)       ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
-CREATE TABLE check (
+CREATE TABLE cheque (
     id           INT NOT NULL AUTO_INCREMENT, 
-    supplier_id  INT,                         
+    supplier_id  INT NOT NULL,                         
 
     number       VARCHAR(255),                
     amount       DOUBLE,                      
@@ -133,7 +133,6 @@ CREATE TABLE product (
     warehouse_stock_quantity INT,                                     
     billed_stock_quantity    INT,                                     
     total_stock_quantity     INT,                                     
-
     purchase_price           DOUBLE,                                  
     sale_price               DOUBLE,                                  
     value_added_tax          DOUBLE,                                  
@@ -152,18 +151,18 @@ CREATE TABLE product (
     discount_4               DOUBLE,                                  
     quantity_4               INT,                                     
     sale_price_4             DOUBLE,                                  
-    auxiliary_1              INT,                                     
-    due_1                    INT,                                     
-    bonus_1                  INT,                                     
-    auxiliary_2              INT,                                     
-    due_2                    INT,                                     
-    bonus_2                  INT,                                     
-    auxiliary_3              INT,                                     
-    due_3                    INT,                                     
-    bonus_3                  INT,                                     
-    auxiliary_4              INT,                                     
-    due_4                    INT,                                     
-    bonus_4                  INT,                                     
+    auxiliary_1              DOUBLE,                                     
+    due_1                    DOUBLE,                                     
+    bonus_1                  DOUBLE,                                     
+    auxiliary_2              DOUBLE,                                     
+    due_2                    DOUBLE,                                     
+    bonus_2                  DOUBLE,                                     
+    auxiliary_3              DOUBLE,                                     
+    due_3                    DOUBLE,                                     
+    bonus_3                  DOUBLE,                                     
+    auxiliary_4              DOUBLE,                                     
+    due_4                    DOUBLE,                                     
+    bonus_4                  DOUBLE,                                     
 
     is_archived              BOOLEAN DEFAULT 0,                       
     archive_date             DATE,                                    
@@ -228,7 +227,7 @@ CREATE TABLE repertoire (
 
 CREATE TABLE foreign_purchase (
     id                           INT NOT NULL AUTO_INCREMENT, 
-    supplier_id                  INT,                         
+    supplier_id                  INT NOT NULL,
 
     invoice_number               VARCHAR(255),                
     invoice_date                 DATE,                        
@@ -245,7 +244,7 @@ CREATE TABLE foreign_purchase (
     payment_2_date               DATE,                        
     payment_3_amount             DOUBLE,                      
     payment_3_date               DATE,                        
-    amount_paid                  DOUBLE                       
+    amount_paid                  DOUBLE,
 
     PRIMARY KEY (id),
     FOREIGN KEY (supplier_id) REFERENCES supplier(id) ON UPDATE CASCADE ON DELETE RESTRICT
@@ -253,13 +252,13 @@ CREATE TABLE foreign_purchase (
 
 CREATE TABLE invoiced_purchase (
     id                    INT NOT NULL AUTO_INCREMENT,                   
-    supplier_id           INT,                                           
+    supplier_id           INT NOT NULL,                                           
 
     invoice_number        VARCHAR(255),                                  
     transaction_date      DATE,                                          
     settlement_date       DATE,                                          
     is_settled            BOOLEAN DEFAULT 0,                             
-    check_number          VARCHAR(255),                                  
+    cheque_number         VARCHAR(255),                                  
     tax_rate_7            INT CHECK (tax_rate_7 IN (7,10,12,13,14,20)),  
     excluding_tax_7       DOUBLE,                                        
     value_added_tax_7     DOUBLE,                                        
@@ -296,7 +295,7 @@ CREATE TABLE invoiced_purchase (
 
 CREATE TABLE simple_purchase (
     id               INT NOT NULL AUTO_INCREMENT, 
-    supplier_id      INT,                         
+    supplier_id      INT NOT NULL,                         
 
     code             VARCHAR(255),                
     transaction_date DATE,                        
@@ -316,77 +315,74 @@ CREATE TABLE merchandise (
     purchase_type        ENUM(                        
                             'imported',
                             'invoiced',
-                            'warehouse'
+                            'stored'
                          ),
     quantity             INT,                         
     free_unit            INT,                         
     price                DOUBLE,                      
 
     PRIMARY KEY (id),
-    FOREIGN KEY (foreign_purchase_id) REFERENCES foreign_purchase(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (invoice_purchase_id) REFERENCES invoice_purchase(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (simple_purchase_id)  REFERENCES simple_purchase(id)  ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (product_id)          REFERENCES product(id)          ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (foreign_purchase_id)  REFERENCES foreign_purchase(id)  ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (invoiced_purchase_id) REFERENCES invoiced_purchase(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (simple_purchase_id)   REFERENCES simple_purchase(id)   ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (product_id)           REFERENCES product(id)           ON UPDATE CASCADE ON DELETE RESTRICT,
 
     UNIQUE (foreign_purchase_id, product_id), 
-    UNIQUE (invoice_purchase_id, product_id), 
+    UNIQUE (invoiced_purchase_id, product_id), 
     UNIQUE (simple_purchase_id , product_id),
 
     CHECK (
-           (foreign_purchase_id IS NOT NULL AND invoice_purchase_id IS NULL     AND simple_purchase_id IS     NULL)
-        OR (foreign_purchase_id IS NULL     AND invoice_purchase_id IS NOT NULL AND simple_purchase_id IS     NULL)
-        OR (foreign_purchase_id IS NULL     AND invoice_purchase_id IS NULL     AND simple_purchase_id IS NOT NULL)
+           (foreign_purchase_id IS NOT NULL AND invoiced_purchase_id IS NULL     AND simple_purchase_id IS     NULL)
+        OR (foreign_purchase_id IS NULL     AND invoiced_purchase_id IS NOT NULL AND simple_purchase_id IS     NULL)
+        OR (foreign_purchase_id IS NULL     AND invoiced_purchase_id IS NULL     AND simple_purchase_id IS NOT NULL)
     )
 );
 
 CREATE TABLE delivery (
-    id                     INT NOT NULL AUTO_INCREMENT, 
-    repertoire_id          INT,                         
-    employee_id            INT,                         
+    id                      INT NOT NULL AUTO_INCREMENT, 
+    repertoire_id           INT NOT NULL,                         
+    employee_id             INT NOT NULL,                         
 
-    code                   VARCHAR(255),                
-    issue_date             DATE,                        
-    delivery_date          DATE,                        
-    transport_code         VARCHAR(255),                
-    total_amount           DOUBLE,                      
-    remarks                TEXT,                        
-    is_settled             BOOLEAN,                     
-    general_payment_method ENUM(                        
-                                'check',
+    code                    VARCHAR(255),                
+    issue_date              DATE,                        
+    delivery_date           DATE,                        
+    transport_code          VARCHAR(255),                
+    total_amount            DOUBLE,                      
+    remarks                 TEXT,                        
+    is_settled              BOOLEAN,                     
+    general_payment_method  ENUM(                        
+                                'cheque',
                                 'transfer',
                                 'draft',
                                 'cash'
-                           ),
-
-    payment_1_amount       DOUBLE,                      
-    payment_1_date         DATE,                        
-    payment_1_check_number VARCHAR(255),                
-    payment_1_method       ENUM(                        
-                                'check',
+                            ),
+    payment_1_amount        DOUBLE,                      
+    payment_1_date          DATE,                        
+    payment_1_cheque_number VARCHAR(255),                
+    payment_1_method        ENUM(                        
+                                'cheque',
                                 'transfer',
                                 'draft',
                                 'cash'
-                           ),
-
-    payment_2_amount       DOUBLE,                      
-    payment_2_date         DATE,                        
-    payment_2_method       ENUM(                        
-                                'check',
+                            ),
+    payment_2_amount        DOUBLE,                      
+    payment_2_date          DATE,                        
+    payment_2_method        ENUM(                        
+                                'cheque',
                                 'transfer',
                                 'draft',
                                 'cash'
-                           ),
-    payment_2_check_number VARCHAR(255),                
-
-    payment_3_amount       DOUBLE,                      
-    payment_3_date         DATE,                        
-    payment_3_check_number VARCHAR(255),                
-    payment_3_method       ENUM(                        
-                                'check',
+                            ),
+    payment_2_cheque_number VARCHAR(255),                
+    payment_3_amount        DOUBLE,                      
+    payment_3_date          DATE,                        
+    payment_3_cheque_number VARCHAR(255),                
+    payment_3_method        ENUM(                        
+                                'cheque',
                                 'transfer',
                                 'draft',
                                 'cash'
-                           ),
+                            ),
 
     PRIMARY KEY (id),
     FOREIGN KEY (repertoire_id) REFERENCES repertoire(id) ON UPDATE CASCADE ON DELETE RESTRICT,
@@ -395,7 +391,7 @@ CREATE TABLE delivery (
 
 CREATE TABLE invoice (
     id                         INT NOT NULL AUTO_INCREMENT, 
-    repertoire_id              INT,                         
+    repertoire_id              INT NOT NULL,                         
 
     number                     VARCHAR(255),                
     invoice_date               DATE,                        
@@ -406,29 +402,27 @@ CREATE TABLE invoice (
     payment_1_amount           DOUBLE,                      
     payment_1_date             DATE,                        
     payment_1_reference_number VARCHAR(255),                
-    payment_1_check_number     VARCHAR(255),                
+    payment_1_cheque_number    VARCHAR(255),                
     payment_1_method           ENUM(                        
-                                    'check',
+                                    'cheque',
                                     'transfer',
                                     'draft',
                                     'cash'
                                ),
-
     payment_2_amount           DOUBLE,                      
     payment_2_date             DATE,                        
     payment_2_reference_number VARCHAR(255),                
-    payment_2_check_number     VARCHAR(255),                
+    payment_2_cheque_number    VARCHAR(255),                
     payment_2_method           ENUM(                        
                                    'cheque',
                                    'virement',
                                    'trait',
                                    'espece'
                                ),
-
     payment_3_amount           DOUBLE,                      
     payment_3_date             DATE,                        
     payment_3_reference_number VARCHAR(255),                
-    payment_3_check_number     VARCHAR(255),                
+    payment_3_cheque_number    VARCHAR(255),                
     payment_3_method           ENUM(                        
                                    'cheque',
                                    'virement',
@@ -442,7 +436,7 @@ CREATE TABLE invoice (
 
 CREATE TABLE dispatch_note (
     id            INT NOT NULL AUTO_INCREMENT, 
-    employee_id   INT,                         
+    employee_id   INT NOT NULL,                         
 
     code          VARCHAR(256),                
     dispatch_date DATE,                        
@@ -469,10 +463,10 @@ CREATE TABLE transaction_item (
     amount             DOUBLE,                      
 
     PRIMARY KEY (id),
-    FOREIGN KEY (delivery_id)      REFERENCES delivery(id)     ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (invoice_id)       REFERENCES invoices(id)       ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (dispatch_note_id) REFERENCES dispatch_notes(id) ON UPDATE CASCADE ON DELETE RESTRICT,
-    FOREIGN KEY (product_id)       REFERENCES product(id)        ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (delivery_id)      REFERENCES delivery(id)      ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (invoice_id)       REFERENCES invoice(id)       ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (dispatch_note_id) REFERENCES dispatch_note(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    FOREIGN KEY (product_id)       REFERENCES product(id)       ON UPDATE CASCADE ON DELETE RESTRICT,
 
     UNIQUE (delivery_id     , product_id),
     UNIQUE (invoice_id      , product_id),
@@ -486,28 +480,28 @@ CREATE TABLE transaction_item (
 );
 
 CREATE TABLE vat_snapshot (
-    id                   INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
-    start_date           DATE,                                    
-    end_date             DATE,                                    
-    previous_vat_amount  DOUBLE,                                  
-    purchase_vat_amount  DOUBLE,                                  
-    sales_vat_amount     DOUBLE,                                  
-    total                DOUBLE                                   
+    id                  INT NOT NULL AUTO_INCREMENT PRIMARY KEY, 
+    start_date          DATE,                                    
+    end_date            DATE,                                    
+    previous_vat_amount DOUBLE,                                  
+    purchase_vat_amount DOUBLE,                                  
+    sales_vat_amount    DOUBLE,                                  
+    total               DOUBLE                                   
 );
 
 CREATE TABLE pay_slip (
-    id                    INT NOT NULL AUTO_INCREMENT, 
-    employee_id           INT,                         
+    id                INT NOT NULL AUTO_INCREMENT, 
+    employee_id       INT NOT NULL,                         
 
-    start_date            DATE,                        
-    end_date              DATE,                        
-    total_sold_amount     DOUBLE,                      
-    fixed                 VARCHAR(255),                
-    cnss                  VARCHAR(255),                
-    bonus                 DOUBLE,                      
-    product_bonus         DOUBLE,                      
-    salary                DOUBLE,                      
-    expenses              DOUBLE,                      
+    start_date        DATE,                        
+    end_date          DATE,                        
+    total_sold_amount DOUBLE,                      
+    fixed             VARCHAR(255),                
+    cnss              VARCHAR(255),                
+    bonus             DOUBLE,                      
+    product_bonus     DOUBLE,                      
+    salary            DOUBLE,                      
+    expenses          DOUBLE,                      
 
     PRIMARY KEY (id),
     FOREIGN KEY (employee_id) REFERENCES employee(id) ON UPDATE CASCADE ON DELETE RESTRICT

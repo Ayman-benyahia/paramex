@@ -22,7 +22,6 @@ app.use(express.json());
 
 
 // Start server
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`✅ Paramex backend started. Listening on port http://localhost:${PORT}...`);
+app.listen(process.env.PORT, () => {
+    console.log(`✅ Paramex backend started. Listening on port http://localhost:${process.env.PORT}...`);
 });
