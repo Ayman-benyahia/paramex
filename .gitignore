@@ -20,5 +20,6 @@ dist/
 build/
 
 # Miscellaneous
+todo.txt
 _.db 
 __.db 

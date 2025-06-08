@@ -24,8 +24,8 @@ CREATE TABLE employee (
     id              INT NOT NULL AUTO_INCREMENT, 
     city_id         INT NOT NULL,                
 
-    designation     VARCHAR(255),                
-    position_type   ENUM(                        
+    fullname        VARCHAR(255),                
+    job_title       ENUM(                        
                        'administrator', 
                        'manager', 
                        'accountant', 
