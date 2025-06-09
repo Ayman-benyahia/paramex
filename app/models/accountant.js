@@ -1,5 +1,7 @@
+const dbh = require('../utilities/dbh');
+
 module.exports = {
-    fetchAll: (dbh, data) => {
+    fetchAll: (data) => {
         const { search, page } = data;
         const LIMIT = 20;
         let offset = page * LIMIT;
@@ -27,12 +29,12 @@ module.exports = {
         ]);
     },
 
-    fetchSingle: (dbh, id) => {
+    fetchSingle: (id) => {
         const SQL_FETCH_ACCOUNTANT = `SELECT * FROM accountant WHERE id = ? AND ( is_archived = 0 AND is_deleted = 0 )`;
         return dbh.query(SQL_FETCH_ACCOUNTANT, [ id ]);
     },
 
-    insert: (dbh, data) => {
+    insert: (data) => {
         const {
             designation,
             code,
@@ -57,7 +59,7 @@ module.exports = {
         ]);
     },
 
-    update: (dbh, data) => {
+    update: (data) => {
         const {
             designation,
             code,
@@ -81,27 +83,27 @@ module.exports = {
         ]);
     },
 
-    delete: (dbh, id) => {
+    delete: (id) => {
         const SQL_DELETE_ACCOUNTANT = `DELETE FROM accountant WHERE id = ? AND (is_archived = 1 || is_deleted = 1)`;
         return dbh.query(SQL_DELETE_ACCOUNTANT, [ id ]);
     },
 
-    dispose: (dbh, id) => {
+    dispose: (id) => {
         const SQL_DISPOSE_ACCOUNTANT = `UPDATE accountant SET is_deleted = 1, deletion_date=CURRENT_TIMESTAMP WHERE id = ?`;
         return dbh.query(SQL_DISPOSE_ACCOUNTANT, [ id ]);
     },
 
-    restore: (dbh, id) => {
+    restore: (id) => {
         const SQL_DISPOSE_ACCOUNTANT = `UPDATE accountant SET is_deleted = 0, deletion_date=NULL WHERE id = ?`;
         return dbh.query(SQL_DISPOSE_ACCOUNTANT, [ id ]);
     },
 
-    archive: (dbh, id) => {
+    archive: (id) => {
         const SQL_ARCHIVE_ACCOUNTANT = `UPDATE accountant SET is_archived = 1, archive_date=CURRENT_TIMESTAMP WHERE id = ?`;
         return dbh.query(SQL_ARCHIVE_ACCOUNTANT, [ id ]);
     },
 
-    unarchive: (dbh, id) => {
+    unarchive: (id) => {
         const SQL_ARCHIVE_ACCOUNTANT = `UPDATE accountant SET is_archived = 0, archive_date=NULL WHERE id = ?`;
         return dbh.query(SQL_ARCHIVE_ACCOUNTANT, [ id ]);
     }

@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const [cities] = await cityModel.fetchAll(req.app.locals.dbh, { search, page });
+        const [cities] = await cityModel.fetchAll({ search, page });
         res.render(`settings/city/entryList`, { 
             baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
             user: req.session.user,

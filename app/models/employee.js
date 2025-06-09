@@ -1,5 +1,7 @@
+const dbh = require('../utilities/dbh');
+
 module.exports = {
-    fetchAll: (dbh, data) => {
+    fetchAll: (data) => {
         const { search, page } = data;
         const LIMIT = 20;
         let offset = page * LIMIT;
@@ -43,7 +45,7 @@ module.exports = {
         );
     },
 
-    fetchSingle: (dbh, id) => {
+    fetchSingle: (id) => {
         const SQL_FETCH_EMPLOYEE = `
             SELECT emp.*, 
                    cit.name AS city
@@ -55,7 +57,7 @@ module.exports = {
         return dbh.query(SQL_FETCH_EMPLOYEE, [ id ]);
     },
 
-    insert: async (dbh, data) => {
+    insert: async (data) => {
         const {
             city_id,  fullname, job_title,
             password, phone_1,  phone_2,
@@ -134,7 +136,7 @@ module.exports = {
         }
     },
 
-    update: (dbh, data) => {
+    update: (data) => {
         const {
             city_id,  fullname, job_title,
             password, phone_1,  phone_2,
@@ -156,27 +158,27 @@ module.exports = {
         ]);
     },
 
-    delete: (dbh, id) => {
+    delete: (id) => {
         const SQL_DELETE_EMPLOYEE = `DELETE FROM employee WHERE id = ? AND (is_archived = 0 || is_deleted = 0)`;
         return dbh.query(SQL_DELETE_EMPLOYEE, [ id ]);
     },
 
-    dispose: (dbh, id) => {
+    dispose: (id) => {
         const SQL_DISPOSE_EMPLOYEE = `UPDATE employee SET is_deleted = 1, deletion_date=CURRENT_TIMESTAMP WHERE id = ?`;
         return dbh.query(SQL_DISPOSE_EMPLOYEE, [ id ]);
     },
 
-    restore: (dbh, id) => {
+    restore: (id) => {
         const SQL_DISPOSE_EMPLOYEE = `UPDATE employee SET is_deleted = 0, deletion_date=NULL WHERE id = ?`;
         return dbh.query(SQL_DISPOSE_EMPLOYEE, [ id ]);
     },
 
-    archive: (dbh, id) => {
+    archive: (id) => {
         const SQL_ARCHIVE_EMPLOYEE = `UPDATE employee SET is_archived = 1, archive_date=CURRENT_TIMESTAMP WHERE id = ?`;
         return dbh.query(SQL_ARCHIVE_EMPLOYEE, [ id ]);
     },
 
-    unarchive: (dbh, id) => {
+    unarchive: (id) => {
         const SQL_ARCHIVE_EMPLOYEE = `UPDATE employee SET is_archived = 0, archive_date=NULL WHERE id = ?`;
         return dbh.query(SQL_ARCHIVE_EMPLOYEE, [ id ]);
     }

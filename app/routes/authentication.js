@@ -1,6 +1,7 @@
 const express = require('express');
 const { createHash } = require('crypto');
 const sendGmail = require('../utilities/sendGmail');
+const dbh = require('../utilities/dbh');
 const router = express.Router();
 
 
@@ -28,7 +29,6 @@ router.post('/connexion', async (req, res) => {
     let employee = null;
 
     try {
-        const { dbh } = req.app.locals;
         const SQL_FETCH_EMPLOYEE_JOINED_ROLES = `
             SELECT     * 
             FROM       employee AS emp 
@@ -106,7 +106,6 @@ router.post('/connexion', async (req, res) => {
 
 router.get('/recuperation', async (req, res) => {
     try {
-        const { dbh } = req.app.locals;
         const SQL_FETCH_EMPLOYEE = `SELECT * FROM employee LIMIT 1`;
         const [ records ] = await dbh.query(SQL_FETCH_EMPLOYEE, []);
         var fullname = records[0].fullname;

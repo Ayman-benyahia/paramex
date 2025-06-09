@@ -17,7 +17,6 @@ const cityRouter      = require('./app/routes/city');
 // Configs
 
 const app = express();
-app.locals.dbh = dbh;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

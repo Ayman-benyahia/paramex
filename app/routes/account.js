@@ -1,3 +1,4 @@
+const dbh = require('../utilities/dbh');
 const express = require('express');
 const router = express.Router();
 
@@ -20,7 +21,6 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const { dbh } = req.app.locals;
         const SQL_FETCH_ADMIN = `SELECT * FROM employee LIMIT 1`;
         const [records] = await dbh.query(SQL_FETCH_ADMIN, []);
         employee = records[0] || null;
@@ -47,7 +47,6 @@ router.post('/', async (req, res) => {
     let { id, fullname, password } = req.body;
 
     try {
-        const { dbh } = req.app.locals;
         const SQL_UPDATE_ADMIN_ACCOUNT = `UPDATE employee SET fullname=?, password=? WHERE id = ?`;
         let [ results ] = await dbh.query(SQL_UPDATE_ADMIN_ACCOUNT, [fullname, password, parseInt(id, 10)]);
 

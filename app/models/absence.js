@@ -1,5 +1,7 @@
+const dbh = require('../utilities/dbh');
+
 module.exports = {
-    fetchAll: (dbh, data) => {
+    fetchAll: (data) => {
         const { search, page } = data;
         const LIMIT  = 20;
         const OFFSET = page * LIMIT;
@@ -31,7 +33,7 @@ module.exports = {
         ]);
     },
 
-    fetchSingle: (dbh, id) => {
+    fetchSingle: (id) => {
         const SQL_FETCH_ABSENCE = `
             SELECT abs.*, 
                    emp.fullname AS employee,
@@ -48,7 +50,7 @@ module.exports = {
         return dbh.query(SQL_FETCH_ABSENCE, [ id ]);
     },
 
-    insert: (dbh, data) => {
+    insert: (data) => {
         const {
             employee_id,
             absence_date,
@@ -79,7 +81,7 @@ module.exports = {
         ]);
     },
 
-    update: (dbh, data) => {
+    update: (data) => {
         const {
             employee_id,
             absence_date,
@@ -109,7 +111,7 @@ module.exports = {
         ]);
     },
 
-    delete: (dbh, id) => {
+    delete: (id) => {
         const SQL_DELETE_ABSENCE = `
             DELETE abs 
             FROM   absence  AS abs 

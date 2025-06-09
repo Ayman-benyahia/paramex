@@ -1,5 +1,7 @@
+const dbh = require('../utilities/dbh');
+
 module.exports = {
-    fetchAll: (dbh, data) => {
+    fetchAll: (data) => {
         const { search, page } = data;
         const LIMIT = 20;
         let offset  = page * LIMIT;
@@ -23,12 +25,12 @@ module.exports = {
         ]);
     },
 
-    fetchSingle: (dbh, id) => {
+    fetchSingle: (id) => {
         const SQL_FETCH_BONUS = `SELECT * FROM bonus WHERE id = ?`;
         return dbh.query(SQL_FETCH_BONUS, id);
     },
 
-    insert: (dbh, data) => {
+    insert: (data) => {
         const {
             due, 
             auxiliary, 
@@ -53,7 +55,7 @@ module.exports = {
         ]);
     },
 
-    update: (dbh, data) => {
+    update: (data) => {
         const {
             due, 
             auxiliary, 
@@ -77,7 +79,7 @@ module.exports = {
         ]);
     },
 
-    delete: (dbh, id) => {
+    delete: (id) => {
         const SQL_DELETE_BONUS = `DELETE FROM bonus WHERE id = ?`;
         return dbh.query(SQL_DELETE_BONUS, [ id ]);
     }

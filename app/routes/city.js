@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const [cities] = await cityModel.fetchAll(req.app.locals.dbh, { search, page });
+        const [cities] = await cityModel.fetchAll({ search, page });
         res.render(`settings/city/entryList`, { 
             baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
             user: req.session.user,
@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
 
 router.post(`/ajoute`, async (req, res) => {
     try {
-        const [result] = await cityModel.insert(req.app.locals.dbh, req.body);
+        const [result] = await cityModel.insert(req.body);
 
         req.session.alert = {
             type: 'success',
@@ -72,7 +72,7 @@ router.post(`/ajoute`, async (req, res) => {
 
 router.post('/modifie', async (req, res) => {
     try {
-        const [result] = await cityModel.update(req.app.locals.dbh, req.body);
+        const [result] = await cityModel.update(req.body);
 
         req.session.alert = {
             type: 'success',
@@ -103,7 +103,7 @@ router.get('/supprime', async (req, res) => {
     id = id ? parseInt(id, 10) : -1;
 
     try {
-        const [result] = await cityModel.delete(req.app.locals.dbh, id);
+        const [result] = await cityModel.delete(id);
 
         req.session.alert = {
             type: 'success',

@@ -1,3 +1,4 @@
+const dbh = require('../utilities/dbh');
 const express = require('express');
 const router = express.Router();
 
@@ -20,7 +21,6 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const { dbh } = req.app.locals;
         const SQL_FETCH_COMPANY_DETAILS = `SELECT * FROM company LIMIT 1`;
         let [ records ] = await dbh.query(SQL_FETCH_COMPANY_DETAILS, []);
         if(records.length <= 0) {
@@ -68,7 +68,6 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     try {
-        const { dbh } = req.app.locals;
         const SQL_UPDATE_COMPANY_DETAILS = `
             UPDATE company 
             SET    id                          = ?,

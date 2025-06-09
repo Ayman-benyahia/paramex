@@ -1,5 +1,7 @@
+const dbh = require('../utilities/dbh');
+
 module.exports = {
-    fetchAll: (dbh, data) => {
+    fetchAll: (data) => {
         const { search, page } = data;
         const LIMIT  = 20;
         const OFFSET = page * LIMIT;
@@ -43,7 +45,7 @@ module.exports = {
         ]);
     },
 
-    fetchSingle: (dbh, id) => {
+    fetchSingle: (id) => {
         const SQL_FETCH_SUPPLIER = `
             SELECT sup.*, 
                    cit.name AS city, 
@@ -58,7 +60,7 @@ module.exports = {
         return dbh.query(SQL_FETCH_SUPPLIER, [ id ]);
     },
 
-    insert: (dbh, data) => {
+    insert: (data) => {
         const {
             accountant_id,
             city_id,
@@ -99,7 +101,7 @@ module.exports = {
         ]);
     },
 
-    update: (dbh, data) => {
+    update: (data) => {
         const {
             accountant_id,
             city_id,
@@ -138,27 +140,27 @@ module.exports = {
         ]);
     },
 
-    delete: (dbh, id) => {
+    delete: (id) => {
         const SQL_DELETE_SUPPLIER = `DELETE FROM supplier WHERE id = ? AND (is_archived = 0 AND is_deleted = 0)`;
         return dbh.query(SQL_DELETE_SUPPLIER, [ id ]);
     },
 
-    dispose: (dbh, id) => {
+    dispose: (id) => {
         const SQL_DISPOSE_SUPPLIER = `UPDATE supplier SET is_deleted = 1, deletion_date=CURRENT_TIMESTAMP WHERE id = ?`;
         return dbh.query(SQL_DISPOSE_SUPPLIER, [ id ]);
     },
 
-    restore: (dbh, id) => {
+    restore: (id) => {
         const SQL_DISPOSE_SUPPLIER = `UPDATE supplier SET is_deleted = 0, deletion_date=NULL WHERE id = ?`;
         return dbh.query(SQL_DISPOSE_SUPPLIER, [ id ]);
     },
 
-    archive: (dbh, id) => {
+    archive: (id) => {
         const SQL_ARCHIVE_SUPPLIER = `UPDATE supplier SET is_archived = 1, archive_date=CURRENT_TIMESTAMP WHERE id = ?`;
         return dbh.query(SQL_ARCHIVE_SUPPLIER, [ id ]);
     },
 
-    unarchive: (dbh, id) => {
+    unarchive: (id) => {
         const SQL_ARCHIVE_SUPPLIER = `UPDATE supplier SET is_archived = 0, archive_date=NULL WHERE id = ?`;
         return dbh.query(SQL_ARCHIVE_SUPPLIER, [ id ]);
     }

@@ -1,5 +1,7 @@
+const dbh = require('../utilities/dbh');
+
 module.exports = {
-    fetchAll: (dbh, data) => {
+    fetchAll: (data) => {
         const { search, page } = data;
         const LIMIT  = 20;
         const OFFSET = page * LIMIT;
@@ -28,7 +30,7 @@ module.exports = {
         ]);
     },
 
-    fetchSingle: (dbh, id) => {
+    fetchSingle: (id) => {
         const SQL_FETCH_CHEQUE = `
             SELECT che.*, 
                    sup.name AS supplier
@@ -40,7 +42,7 @@ module.exports = {
         return dbh.query(SQL_FETCH_CHEQUE, id);
     },
 
-    insert: (dbh, data) => {
+    insert: (data) => {
         const {
             supplier_id,
             number,
@@ -71,7 +73,7 @@ module.exports = {
         ]);
     },
 
-    update: (dbh, data) => {
+    update: (data) => {
         const {
             supplier_id,
             number,
@@ -101,7 +103,7 @@ module.exports = {
         ]);
     },
 
-    delete: (dbh, id) => {
+    delete: (id) => {
         const SQL_DELETE_CHEQUE = `
             DELETE che
             FROM   cheque   AS che
