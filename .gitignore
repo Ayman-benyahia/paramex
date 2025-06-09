@@ -19,7 +19,9 @@ npm-debug.log*
 dist/
 build/
 
+# Database files
+*.db 
+*.sql
+
 # Miscellaneous
-todo.txt
-_.db 
-__.db 
+*.txt

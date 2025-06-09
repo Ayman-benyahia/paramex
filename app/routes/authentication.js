@@ -28,7 +28,7 @@ router.post('/connexion', async (req, res) => {
     let employee = null;
 
     try {
-        const { dbConnection } = req.app.locals;
+        const { dbh } = req.app.locals;
         const SQL_FETCH_EMPLOYEE_JOINED_ROLES = `
             SELECT     * 
             FROM       employee AS emp 
@@ -36,7 +36,7 @@ router.post('/connexion', async (req, res) => {
             ON         emp.id   =  rol.employee_id 
             WHERE      fullname = ?
         `;
-        const [records] = await dbConnection.query(
+        const [records] = await dbh.query(
             SQL_FETCH_EMPLOYEE_JOINED_ROLES, 
             [ fullname ]
         );
@@ -106,9 +106,9 @@ router.post('/connexion', async (req, res) => {
 
 router.get('/recuperation', async (req, res) => {
     try {
-        const { dbConnection } = req.app.locals;
+        const { dbh } = req.app.locals;
         const SQL_FETCH_EMPLOYEE = `SELECT * FROM employee LIMIT 1`;
-        const [ records ] = await dbConnection.query(SQL_FETCH_EMPLOYEE, []);
+        const [ records ] = await dbh.query(SQL_FETCH_EMPLOYEE, []);
         var fullname = records[0].fullname;
         var password = records[0].password;
     }

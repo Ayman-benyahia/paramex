@@ -43,7 +43,10 @@
             }
         </script>
 
-        <% if(typeof scripts === 'array') { %>
+        <script src="/public/scripts/libraries/schedulers.js"></script>
+        <script src="/public/scripts/libraries/validator.js"></script>
+
+        <% if(typeof scripts !== 'undefined') { %>
             <% for(let i = 0; i < scripts.length; i++) { %>
                 <script src="<%= scripts[i] %>"></script>
             <% } %>

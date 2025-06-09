@@ -20,9 +20,9 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const { dbConnection } = req.app.locals;
+        const { dbh } = req.app.locals;
         const SQL_FETCH_ADMIN = `SELECT * FROM employee LIMIT 1`;
-        const [records] = await dbConnection.query(SQL_FETCH_ADMIN, []);
+        const [records] = await dbh.query(SQL_FETCH_ADMIN, []);
         employee = records[0] || null;
     }
     catch(error) {
@@ -47,9 +47,9 @@ router.post('/', async (req, res) => {
     let { id, fullname, password } = req.body;
 
     try {
-        const { dbConnection } = req.app.locals;
+        const { dbh } = req.app.locals;
         const SQL_UPDATE_ADMIN_ACCOUNT = `UPDATE employee SET fullname=?, password=? WHERE id = ?`;
-        let [ results ] = await dbConnection.query(SQL_UPDATE_ADMIN_ACCOUNT, [fullname, password, parseInt(id, 10)]);
+        let [ results ] = await dbh.query(SQL_UPDATE_ADMIN_ACCOUNT, [fullname, password, parseInt(id, 10)]);
 
         req.session.alert = {
             type: 'success', 

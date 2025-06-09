@@ -3,7 +3,7 @@ const express = require('express');
 const session = require('express-session');
 
 const path            = require('path');
-const dbConnection    = require('./app/utilities/dbh');
+const dbh             = require('./app/utilities/dbh');
 const sendGmail       = require('./app/utilities/sendGmail');
 const { isBackupScheduled, scheduleBackup, unscheduleBackup } = require('./app/utilities/backup');
 
@@ -11,12 +11,13 @@ const authRouter      = require('./app/routes/authentication');
 const dashboardRouter = require('./app/routes/dashboard');
 const accountRouter   = require('./app/routes/account');
 const companyRouter   = require('./app/routes/settings/company');
+const cityRouter      = require('./app/routes/settings/city');
 
 
 // Configs
 
 const app = express();
-app.locals.dbConnection = dbConnection;
+app.locals.dbh = dbh;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,6 +43,7 @@ app.use('/auth', authRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/account', accountRouter);
 app.use('/parametres/societe', companyRouter);
+app.use('/parametres/ville', cityRouter);
 
 
 // Start server

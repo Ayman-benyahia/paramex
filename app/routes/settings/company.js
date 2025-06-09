@@ -20,9 +20,9 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const { dbConnection } = req.app.locals;
+        const { dbh } = req.app.locals;
         const SQL_FETCH_COMPANY_DETAILS = `SELECT * FROM company LIMIT 1`;
-        let [ records ] = await dbConnection.query(SQL_FETCH_COMPANY_DETAILS, []);
+        let [ records ] = await dbh.query(SQL_FETCH_COMPANY_DETAILS, []);
         if(records.length <= 0) {
             console.error(`[${new Date().toISOString()}] The 'company' table is empty. A company record must be created as one of the initial steps in system configuration.`);
             res.statusCode = 500;
@@ -67,7 +67,7 @@ router.post('/', async (req, res) => {
     } = req.body;
 
     try {
-        const { dbConnection } = req.app.locals;
+        const { dbh } = req.app.locals;
         const SQL_UPDATE_COMPANY_DETAILS = `
             UPDATE company 
             SET    id                          = ?,
@@ -83,7 +83,7 @@ router.post('/', async (req, res) => {
                    risk_rate                   = ?
             WHERE  id = ?`;
 
-        const [ results ] = await dbConnection.query(SQL_UPDATE_COMPANY_DETAILS, [
+        const [ results ] = await dbh.query(SQL_UPDATE_COMPANY_DETAILS, [
             id,
             name,
             company_registration_number,

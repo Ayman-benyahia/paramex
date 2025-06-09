@@ -91,7 +91,7 @@
         <!-- "Header" 
         ----------------------------------------------------------------------->
         
-        <header class="p-3 bg-light">
+        <header class="p-3 <%= (tabs && Array.isArray(tabs) && tabs.length > 0) ? 'pb-0' : '' %> bg-light">
             <div class="d-flex justify-content-between align-items-baseline">
 
                 <!-- "Breadcrumb" 
@@ -121,11 +121,12 @@
 
             <!-- "Tabs" 
             ----------------------------------------------------------------------->
-            <% if(typeof tabs === 'array') { %>
+
+            <% if(tabs && Array.isArray(tabs)) { %>
                 <ul class="nav nav-tabs">
                     <% for(let i = 0; i < tabs.length; i++) { %>
                         <li class="nav-item">
-                            <a class="nav-link" href="/<%= tabs[i].url %>">
+                            <a class="nav-link <%= tabs[i].url === baseUrl.pathname ? 'active' : '' %>" href="<%= tabs[i].url %>">
                                 <%= tabs[i].title %>
                             </a>
                         </li>
