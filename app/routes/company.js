@@ -35,6 +35,7 @@ router.get('/', async (req, res) => {
         }
         company = records[0];
         res.render('settings/company', {
+            baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
             user: req.session.user,
             alert,
             company

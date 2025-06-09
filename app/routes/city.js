@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const cityModel = require('../../models/city');
+const cityModel = require('../models/city');
 
 
 router.use((req, res, next) => {

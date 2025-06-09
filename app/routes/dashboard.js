@@ -11,6 +11,7 @@ router.use((req, res, next) => {
 
 router.get('/', (req, res) => {
     res.render('dashboard', {
+        baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),    
         user: req.session.user
     });
 });

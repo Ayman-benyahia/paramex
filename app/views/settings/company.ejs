@@ -1,4 +1,9 @@
-<%- include('../partials/header.ejs', { tabs: ['company', 'cities', 'employees'] }); -%>
+<%- include('../partials/header.ejs', {
+        tabs: [
+            { title: 'Societe' , url: '/parametres/societe' }, 
+            { title: 'Ville'   , url: '/parametres/ville' }
+        ]
+    }); -%>
     <main class="p-3">
         <form class="shadow rounded p-4" action="/parametres/societe" method="POST">
             <h4 class="mb-3">Company's Details</h4>

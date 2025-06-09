@@ -10,8 +10,8 @@ const { isBackupScheduled, scheduleBackup, unscheduleBackup } = require('./app/u
 const authRouter      = require('./app/routes/authentication');
 const dashboardRouter = require('./app/routes/dashboard');
 const accountRouter   = require('./app/routes/account');
-const companyRouter   = require('./app/routes/settings/company');
-const cityRouter      = require('./app/routes/settings/city');
+const companyRouter   = require('./app/routes/company');
+const cityRouter      = require('./app/routes/city');
 
 
 // Configs
