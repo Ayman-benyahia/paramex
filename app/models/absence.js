@@ -1,0 +1,122 @@
+module.exports = {
+    fetchAll: (dbh, data) => {
+        const { search, page } = data;
+        const LIMIT  = 20;
+        const OFFSET = page * LIMIT;
+
+        const SQL_FETCH_ABSENCES = `
+            SELECT abs.*, 
+                   emp.fullname AS employee,
+                   emp.is_archived,
+                   emp.is_deleted
+            FROM   absence  AS abs
+            JOIN   employee AS emp
+            ON     abs.employee_id = emp.id
+            WHERE  (
+                emp.fullname              LIKE ? OR
+                abs.absence_date          LIKE ? OR
+                CAST(abs.penalty AS CHAR) LIKE ?
+            ) AND (
+                emp.is_deleted  = 0 AND 
+                emp.is_archived = 0
+            ) 
+            LIMIT ?, 20
+        `;
+
+        return dbh.query(SQL_FETCH_ABSENCES, [ 
+            `%${search}%`, 
+            `%${search}%`, 
+            `%${search}%`,
+            OFFSET 
+        ]);
+    },
+
+    fetchSingle: (dbh, id) => {
+        const SQL_FETCH_ABSENCE = `
+            SELECT abs.*, 
+                   emp.fullname AS employee,
+                   emp.is_archived,
+                   emp.is_deleted
+            FROM   absence  AS abs
+            JOIN   employee AS emp
+            ON     abs.employee_id = emp.id
+            WHERE  id = ? AND (
+                emp.is_deleted  = 0 AND 
+                emp.is_archived = 0
+            ) 
+        `;
+        return dbh.query(SQL_FETCH_ABSENCE, [ id ]);
+    },
+
+    insert: (dbh, data) => {
+        const {
+            employee_id,
+            absence_date,
+            morning,
+            afternoon,
+            penalty
+        } = data;
+
+        const SQL_INSERT_ABSENCE = `
+            INSERT INTO absence (
+                employee_id,
+                absence_date,
+                morning,
+                afternoon,
+                penalty
+            )
+            VALUES (
+                ?, ?, ?, ?, ?
+            )
+        `;
+
+        return dbh.query(SQL_INSERT_ABSENCE, [ 
+            employee_id,
+            absence_date,
+            morning,
+            afternoon,
+            penalty
+        ]);
+    },
+
+    update: (dbh, data) => {
+        const {
+            employee_id,
+            absence_date,
+            morning,
+            afternoon,
+            penalty,
+            id
+        } = data;
+
+        const SQL_UPDATE_ABSENCE = `
+            UPDATE absence 
+            SET    employee_id  = ?,
+                   absence_date = ?,
+                   morning      = ?,
+                   afternoon    = ?,
+                   penalty      = ?  
+            WHERE  id = ?
+        `;
+
+        return dbh.query(SQL_UPDATE_ABSENCE, [ 
+            employee_id,
+            absence_date,
+            morning,
+            afternoon,
+            penalty,
+            id
+        ]);
+    },
+
+    delete: (dbh, id) => {
+        const SQL_DELETE_ABSENCE = `
+            DELETE abs 
+            FROM   absence  AS abs 
+            JOIN   employee AS emp
+            ON     abs.employee_id = emp.id
+            WHERE  abs.id = ? AND ( emp.is_deleted = 0 AND emp.is_archived = 0 )
+        `;
+        return dbh.query(SQL_DELETE_ABSENCE, [ id ]);
+    }
+}

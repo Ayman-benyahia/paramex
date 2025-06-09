@@ -41,9 +41,9 @@ CREATE TABLE employee (
     hire_date       DATE,                        
 
     is_archived     BOOLEAN DEFAULT 0,           
-    archive_date    DATE,                        
+    archive_date    DATETIME,                        
     is_deleted      BOOLEAN DEFAULT 0,           
-    deletion_date   DATE,                        
+    deletion_date   DATETIME,                        
 
     PRIMARY KEY (id),
     FOREIGN KEY (city_id) REFERENCES city(id) ON UPDATE CASCADE ON DELETE RESTRICT
@@ -63,10 +63,10 @@ CREATE TABLE roles (
     can_modify_invoice          BOOLEAN,                                 
     can_delete_invoice          BOOLEAN,                                 
 
-    FOREIGN KEY (employee_id) REFERENCES employee(id) ON UPDATE CASCADE ON DELETE RESTRICT
+    FOREIGN KEY (employee_id) REFERENCES employee(id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE absences (
+CREATE TABLE absence (
     id             INT NOT NULL AUTO_INCREMENT, 
     employee_id    INT NOT NULL,                         
 
@@ -99,9 +99,9 @@ CREATE TABLE supplier (
     email                       VARCHAR(255),                            
 
     is_archived                 BOOLEAN DEFAULT 0,                       
-    archive_date                DATE,                                    
+    archive_date                DATETIME,                                    
     is_deleted                  BOOLEAN DEFAULT 0,                       
-    deletion_date               DATE,                                    
+    deletion_date               DATETIME,                                    
 
     FOREIGN KEY (accountant_id) REFERENCES accountant(id) ON UPDATE CASCADE ON DELETE RESTRICT,
     FOREIGN KEY (city_id)       REFERENCES city(id)       ON UPDATE CASCADE ON DELETE RESTRICT
@@ -162,12 +162,7 @@ CREATE TABLE product (
     bonus_3                  DOUBLE,                                     
     auxiliary_4              DOUBLE,                                     
     due_4                    DOUBLE,                                     
-    bonus_4                  DOUBLE,                                     
-
-    is_archived              BOOLEAN DEFAULT 0,                       
-    archive_date             DATE,                                    
-    is_deleted               BOOLEAN DEFAULT 0,                       
-    deletion_date            DATE                                     
+    bonus_4                  DOUBLE                                   
 );
 
 CREATE TABLE product_supplier (
@@ -217,9 +212,9 @@ CREATE TABLE repertoire (
     purchase_count              INT,                         
 
     is_archived                 BOOLEAN DEFAULT 0,           
-    archive_date                DATE,                        
+    archive_date                DATETIME,                        
     is_deleted                  BOOLEAN DEFAULT 0,           
-    deletion_date               DATE,                        
+    deletion_date               DATETIME,                        
 
     PRIMARY KEY (id),
     FOREIGN KEY (city_id) REFERENCES city(id) ON UPDATE CASCADE ON DELETE RESTRICT
