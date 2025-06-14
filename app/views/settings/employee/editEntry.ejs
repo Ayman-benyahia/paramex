@@ -1,0 +1,199 @@
+<%- include('../../partials/head.ejs') -%>
+
+    <!-- "Edit Roles Modal" 
+    ----------------------------------------------------------------------->
+    
+    <div class="modal fade" id="editRolesModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" action="/parametres/personnel/modifie/roles" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Give Permissions</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input name="employee_id" type="hidden" value="<%= employee?.id ?? '' %>"> 
+                    <table class="table table-sm table-bordered mb-0" style="table-layout: fixed;">
+                        <thead>
+                            <tr>
+                                <th class="bg-light text-secondary">#</th>
+                                <th class="bg-light text-secondary">Ajoute</th>
+                                <th class="bg-light text-secondary">Modifie</th>
+                                <th class="bg-light text-secondary">Supprime</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th class="bg-light text-secondary">
+                                    Achat Simple
+                                </th>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_add_simple_purchase" type="checkbox" value="1" <%= employee.can_add_simple_purchase == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_modify_simple_purchase" type="checkbox" value="1" <%= employee.can_modify_simple_purchase == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_delete_simple_purchase" type="checkbox" value="1" <%= employee.can_delete_simple_purchase == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary">
+                                    Delivery
+                                </th>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_add_delivery" type="checkbox" value="1" <%= employee.can_add_delivery == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_modify_delivery" type="checkbox" value="1" <%= employee.can_modify_delivery == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_delete_delivery" type="checkbox" value="1" <%= employee.can_delete_delivery == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light text-secondary">
+                                    Invoice
+                                </th>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_add_invoice" type="checkbox" value="1" <%= employee.can_add_invoice == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_modify_invoice" type="checkbox" value="1" <%= employee.can_modify_invoice == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" name="can_delete_invoice" type="checkbox" value="1" <%= employee.can_delete_invoice == 1 ? 'checked' : '' ; %>>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary">Proceed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- "Aside" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../../partials/aside.ejs') -%>
+
+    <!-- "Header" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../../partials/header.ejs') -%>
+
+    <!-- "Main" 
+    ----------------------------------------------------------------------->
+
+    <main class="p-3">
+        <form class="shadow rounded p-4" action="/parametres/personnel/modifie" method="POST">
+
+            <!-- "Alert" 
+            ----------------------------------------------------------------------->
+
+            <% if(alert) { %>
+                <div class="alert alert-<%= alert.type %> alert-dismissible fade show">
+                    <%= alert.message %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+
+            <input name="id" type="hidden" value="<%= employee?.id ?? '' %>">
+
+            <div class="mb-3">
+                <label class="form-label" for="fullname">Full Name</label>
+                <input class="form-control" name="fullname" id="fullname" type="text" value="<%= employee?.fullname ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="password">Password</label>
+                <input class="form-control" name="password" id="password" type="text" value="<%= employee?.password ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="job_title">Job Title</label>
+                <select class="form-select" name="job_title" id="job_title">
+                    <option value="administrator"                 <%= employee?.job_title === 'administrator'                 ? 'selected' : '' %>>Administrator</option>
+                    <option value="manager"                       <%= employee?.job_title === 'manager'                       ? 'selected' : '' %>>Manager</option>
+                    <option value="accountant"                    <%= employee?.job_title === 'accountant'                    ? 'selected' : '' %>>Accountant</option>
+                    <option value="storekeeper"                   <%= employee?.job_title === 'storekeeper'                   ? 'selected' : '' %>>Storekeeper</option>
+                    <option value="internal_sales_representative" <%= employee?.job_title === 'internal_sales_representative' ? 'selected' : '' %>>Internal Sales Rep</option>
+                    <option value="external_sales_representative" <%= employee?.job_title === 'external_sales_representative' ? 'selected' : '' %>>External Sales Rep</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="hire_date">Hire Date</label>
+                <input class="form-control" name="hire_date" id="hire_date" type="text" value="<%= employee?.hire_date ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="salary">Salary</label>
+                <input class="form-control" name="salary" id="salary" type="text" value="<%= employee?.salary ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="phone_1">Phone 1</label>
+                <input class="form-control" name="phone_1" id="phone_1" type="text" value="<%= employee?.phone_1 ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="phone_2">Phone 2</label>
+                <input class="form-control" name="phone_2" id="phone_2" type="text" value="<%= employee?.phone_2 ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="address">Address</label>
+                <textarea class="form-control" name="address" id="address" rows="1"><%= employee?.address ?? '' %></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="city_id" class="form-label">City</label>
+                <select class="form-select" name="city_id" id="city_id" required>
+                    <option value="none" selected disabled>Select a city</option>
+                    <% for(let city of cities) { %>
+                        <option value="<%= city.id %>" <%= city.id === employee?.city_id ? 'selected' : ''  %>>
+                            <%= city.name %>
+                        </option>
+                    <% } %>
+                </select>
+            </div>
+
+            <button class="btn btn-outline-primary" 
+                    type="button" 
+                    data-bs-toggle="modal"
+                    data-bs-target="#editRolesModal">
+                Roles
+            </button>
+
+            <div class="d-flex gap-2 justify-content-start align-items-baseline">
+                <button class="btn btn-primary">Save</button>
+                <a class="btn btn-light border" href="/parametres/personnel">Back</a>
+            </div>
+        </form>
+    </main>
+
+<%- include('../../partials/footer.ejs'); -%>

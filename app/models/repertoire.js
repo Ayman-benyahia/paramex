@@ -1,8 +1,8 @@
 const dbh = require('../utilities/dbh');
 
 module.exports = {
-    fetchAll: (data) => {
-        const { search, page } = data;
+    fetch: (data) => {
+        const { search, page, archive, trash } = data;
         const LIMIT  = 20;
         const OFFSET = page * LIMIT;
 
@@ -26,9 +26,11 @@ module.exports = {
                 rep.address                      LIKE ? OR
                 rep.comment                      LIKE ? OR
                 CAST(rep.purchase_count AS CHAR) LIKE ?
-            ) AND (
-                rep.is_deleted  = 0 AND 
-                rep.is_archived = 0
+            ) 
+            AND ( 
+                (rep.is_deleted = 0 AND rep.is_archived = 0)
+                OR (? = 1 AND rep.is_archived = 1)
+                OR (? = 1 AND rep.is_deleted  = 1)
             )
             LIMIT  ?, 20
         `;
@@ -46,9 +48,26 @@ module.exports = {
             `%${search}%`,
             `%${search}%`,
             `%${search}%`,
-            `%${search}%`,
+            `%${search}%`, 
+            archive ?? 0,
+            trash ?? 0,
             OFFSET
         ]);
+    },
+
+    fetchAll: () => {
+        const SQL_FETCH_CLIENTS = `
+            SELECT rep.*, 
+                   cit.name    AS city
+            FROM   repertoire  AS rep
+            JOIN   city        AS cit
+            ON     rep.city_id =  cit.id 
+            WHERE  (
+                rep.is_deleted  = 0 AND 
+                rep.is_archived = 0
+            )
+        `;
+        return dbh.query(SQL_FETCH_CLIENTS, []);
     },
 
     fetchSingle: (id) => {

@@ -1,0 +1,400 @@
+<%- include('../partials/head.ejs') -%>
+
+    <!-- "Add Entry Modal" 
+    ----------------------------------------------------------------------->
+    
+    <div class="modal fade" id="addEntryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" action="/parametres/fournisseur/ajoute" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Supplier</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">                    
+                    <input name="id" type="hidden" value="">
+                    
+                    <div class="mb-3">
+                        <label class="form-label" for="accountantSelect">Comptable</label>
+                        <select class="form-select" name="accountant_id" id="accountantSelect">
+                            <option value="-1" selected disabled>Aucun</option>
+                            <% for(let accountant of accountants) { %>
+                                <option value="<%= accountant.id %>">
+                                    <%= accountant.designation %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="citySelect">Ville</label>
+                        <select class="form-select" name="city_id" id="citySelect">
+                            <option value="-1" selected disabled>Aucun</option>
+                            <% for(let city of cities) { %>
+                                <option value="<%= city.id %>">
+                                    <%= city.name %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="nameInput">Designation</label>
+                        <input class="form-control" name="name" id="nameInput" type="text" value>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="crnInput">ICE</label>
+                        <input class="form-control" name="company_registration_number" id="crnInput" type="text" value>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="phone1Input">Tel 1</label>
+                        <input class="form-control" name="phone_1" id="phone1Input" type="text" value>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="phone2Input">Tel 2</label>
+                        <input class="form-control" name="phone_2" id="phone2Input" type="text" value>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="addressInput">Adresse</label>
+                        <textarea class="form-control" name="address" id="addressInput" rows="1"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="emailInput">Email</label>
+                        <input class="form-control" name="email" id="emailInput" type="text" value>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary">Proceed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- "Edit Entry Modal" 
+    ----------------------------------------------------------------------->
+
+    <div class="modal fade" id="editEntryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" action="/parametres/fournisseur/modifie" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Supplier's Details</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">                    
+                    <input name="id" type="hidden" value="">
+                    
+                    <div class="mb-3">
+                        <label class="form-label" for="accountantSelect">Comptable</label>
+                        <select class="form-select" name="accountant_id" id="accountantSelect">
+                            <option value="-1" selected disabled>Aucun</option>
+                            <% for(let accountant of accountants) { %>
+                                <option value="<%= accountant.id %>">
+                                    <%= accountant.designation %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="citySelect">Ville</label>
+                        <select class="form-select" name="city_id" id="citySelect">
+                            <option value="-1" selected disabled>Aucun</option>
+                            <% for(let city of cities) { %>
+                                <option value="<%= city.id %>">
+                                    <%= city.name %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="nameInput">Designation</label>
+                        <input class="form-control" name="name" id="nameInput" type="text" value>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="crnInput">ICE</label>
+                        <input class="form-control" name="company_registration_number" id="crnInput" type="text" value>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="phone1Input">Tel 1</label>
+                        <input class="form-control" name="phone_1" id="phone1Input" type="text" value>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="phone2Input">Tel 2</label>
+                        <input class="form-control" name="phone_2" id="phone2Input" type="text" value>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="addressInput">Adresse</label>
+                        <textarea class="form-control" name="address" id="addressInput" rows="1"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="emailInput">Email</label>
+                        <input class="form-control" name="email" id="emailInput" type="text" value>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary">Apply Change</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- "Remove Entry Modal" 
+    ----------------------------------------------------------------------->
+
+    <div class="modal fade" id="removeEntryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" action="/parametres/fournisseur/supprime" method="GET">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Supplier's Deletion</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input name="id" id="removeEntryModal-idInput" type="hidden" value="">
+                    <p>Do you really want to delete <output id="removeEntryModal-designationOutput"></output>?</p>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary">Proceed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- "Aside" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/aside.ejs') -%>
+
+    <!-- "Header" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/header.ejs', {
+            tabs: [
+                { title: 'Societe'        , url: '/parametres/societe'     }, 
+                { title: 'Ville'          , url: '/parametres/ville'       },
+                { title: 'Personnel'      , url: '/parametres/personnel'   },
+                { title: 'Plan Comptable' , url: '/parametres/comptable'   },
+                { title: 'Fournisseur'    , url: '/parametres/fournisseur' },
+                { title: 'Prime'          , url: '/parametres/prime'       },
+                { title: 'Cheque'         , url: '/parametres/cheque'      },
+                { title: 'Absence'        , url: '/parametres/absence'     }
+            ]
+        }); -%>
+
+    <!-- "Main" 
+    ----------------------------------------------------------------------->
+
+    <main class="p-3">
+
+        <!-- "Alert" 
+        ----------------------------------------------------------------------->
+        
+        <% if(alert) { %>
+            <div class="alert alert-<%= alert.type %> alert-dismissible fade show">
+                <%= alert.message %>
+                <button class="btn-close" type="button" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <header class="mb-3 d-flex gap-3 justify-content-between align-items-baseline">
+            <div class="d-flex gap-2">
+
+                <!-- "Add Button" 
+                ----------------------------------------------------------------------->
+                
+                <button class="btn btn-primary" id="addEntryModalTrigger" data-bs-toggle="tooltip" data-bs-title="Add">
+                    <i class="bi bi-plus"></i>
+                </button>
+                
+                <!-- "Search Bar" 
+                ----------------------------------------------------------------------->
+                
+                <div class="input-group" id="searchBar">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input class="form-control" name="search" id="searchBar-input" type="text" value="<%= baseUrl.searchParams.get('search') ?? '' %>" placeholder="Type a search...">
+                </div>
+
+                <!-- "Refresh Button" 
+                ----------------------------------------------------------------------->
+                
+                <a class="btn btn-light border" href="/parametres/fournisseur" data-bs-toggle="tooltip" data-bs-title="Refresh">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+
+                <!-- "Tags" 
+                ----------------------------------------------------------------------->
+                
+                <input class="btn-check" name="archive" id="archiveTag" type="checkbox" value="1" <%= baseUrl.searchParams.get('archive') == '1' ? 'checked' : '' %>>
+                <label class="btn btn-outline-primary rounded-pill" for="archiveTag">Archive</label>
+
+                <input class="btn-check" name="trash" id="trashTag" type="checkbox" value="1" <%= baseUrl.searchParams.get('trash') == '1' ? 'checked' : '' %>>
+                <label class="btn btn-outline-primary rounded-pill" for="trashTag">Corbeille</label>
+            </div>
+        </header>
+
+        <!-- "Tableau" 
+        ----------------------------------------------------------------------->
+        
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th class="bg-light text-secondary">Designation</th>
+                    <th class="bg-light text-secondary">Comptable</th>
+                    <th class="bg-light text-secondary">Ice</th>
+                    <th class="bg-light text-secondary">Email</th>
+                    <th class="bg-light text-secondary">Tel 1</th>
+                    <th class="bg-light text-secondary">Tel 2</th>
+                    <th class="bg-light text-secondary">Ville</th>
+                    <th class="bg-light text-secondary">Adresse</th>
+                    <th class="bg-light text-secondary">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let supplier of suppliers) { %>
+                    <tr>
+                        <input name="id" type="hidden" value="<%= supplier.id %>" disabled>
+                        <input name="designation" type="hidden" value="<%= supplier.name %>" disabled>
+                        <td>
+                            <%= supplier.name %>
+                            <input name="name" type="hidden" value="<%= supplier.name %>" disabled>
+                        </td>
+                        <td>
+                            <%= supplier.accountant %>
+                            <input name="accountant_id" type="hidden" value="<%= supplier.accountant_id %>" disabled>
+                        </td>
+                        <td>
+                            <%= supplier.company_registration_number %>
+                            <input name="company_registration_number" type="hidden" value="<%= supplier.company_registration_number %>" disabled>
+                        </td>
+                        <td>
+                            <%= supplier.email %>
+                            <input name="email" type="hidden" value="<%= supplier.email %>" disabled>
+                        </td>
+                        <td>
+                            <%= supplier.phone_1 %>
+                            <input name="phone_1" type="hidden" value="<%= supplier.phone_1 %>" disabled>
+                        </td>
+                        <td>
+                            <%= supplier.phone_2 %>
+                            <input name="phone_2" type="hidden" value="<%= supplier.phone_2 %>" disabled>
+                        </td>
+                        <td>
+                            <%= supplier.city %>
+                            <input name="city_id" type="hidden" value="<%= supplier.city_id %>" disabled>
+                        </td>
+                        <td>
+                            <%= supplier.address %>
+                            <input name="address" type="hidden" value="<%= supplier.address %>" disabled>
+                        </td>
+                        <td class="d-flex gap-1 justify-content-start align-items-center">
+                            <button class="btn btn-sm btn-secondary" 
+                                    name="editEntryModalTrigger"
+                                    style="--bs-btn-padding-y: .2rem; 
+                                           --bs-btn-padding-x: .3rem; 
+                                           --bs-btn-font-size: .5rem; 
+                                             margin-bottom   : .15rem;"
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-title="Edit">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>                            
+
+                            <form action="/parametres/fournisseur/<%= supplier.is_archived == 1 ? 'desarchiver' : 'archive' %>" method="GET" style="font-size: 0;">
+                                <input type="hidden" name="id" value="<%= supplier.id %>">
+
+                                <% const queryFields = ['page', 'search', 'archive', 'trash']; %>
+                                <% for (let field of queryFields) {
+                                    const value = baseUrl.searchParams.get(field);
+                                    if (value !== null) { %>
+                                        <input type="hidden" name="<%= field %>" value="<%= value %>">
+                                <%  } } %>
+
+                                <button class="btn btn-sm btn-<%= supplier.is_archived == 1 ? 'outline-' : '' %>warning"
+                                        style="--bs-btn-padding-y: .2rem; 
+                                               --bs-btn-padding-x: .3rem; 
+                                               --bs-btn-font-size: .5rem;"
+                                        data-bs-toggle="tooltip"
+                                        data-bs-title="<%= supplier.is_archived == 1 ? 'Desarchiver' : 'Archiver' %>">
+                                    <i class="bi bi-archive-fill"></i>
+                                </button>
+                            </form>
+
+                            <form action="/parametres/fournisseur/restaurer?<%= baseUrl.searchParams.toString() %>&id=<%= supplier.id %>" method="GET" style="font-size: 0;">
+                                <button class="btn btn-sm btn-<%= supplier.is_deleted == 1 ? 'outline-' : '' %>danger" 
+                                        <% if(supplier.is_deleted == 0) { %>name="removeEntryModalTrigger"<% } %>
+                                        style="--bs-btn-padding-y: .2rem; 
+                                               --bs-btn-padding-x: .3rem; 
+                                               --bs-btn-font-size: .5rem;" 
+                                        <% if(supplier.is_deleted == 0) { %>type="button"<% } %>
+                                        data-bs-toggle="tooltip" 
+                                        data-bs-title="<%= supplier.is_deleted == 0 ? 'Remove' : 'Restore' %>">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- "Pagination" 
+        ----------------------------------------------------------------------->
+
+        <% 
+            let page = parseInt(baseUrl.searchParams.get('page') ?? 0, 10);
+
+            baseUrl.searchParams.set('page', Math.max((Math.floor(page / 3) * 3) - 3, 0));
+            let prevIndex   = baseUrl.toString();
+
+            baseUrl.searchParams.set('page', (Math.floor(page / 3) * 3) + 0);
+            let firstIndex  = baseUrl.toString();
+
+            baseUrl.searchParams.set('page', (Math.floor(page / 3) * 3) + 1);
+            let secondIndex = baseUrl.toString();
+
+            baseUrl.searchParams.set('page', (Math.floor(page / 3) * 3) + 2);
+            let thirdIndex  = baseUrl.toString();
+
+            baseUrl.searchParams.set('page', (Math.floor(page / 3) * 3) + 3);
+            let nextIndex   = baseUrl.toString();
+        %>
+
+        <div class="btn-group gap-2">
+            <a class="btn btn-sm btn-light rounded border" href="<%= prevIndex %>" data-bs-toggle="tooltip" data-bs-title="Previous">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <a class="btn btn-sm <%= page === (Math.floor(page / 3) * 3) + 0 ? 'btn-primary' : 'btn-light' %> rounded border" href="<%= firstIndex %>">
+                <%= (Math.floor(page / 3) * 3) + 1 %>
+            </a>
+            <a class="btn btn-sm <%= page === (Math.floor(page / 3) * 3) + 1 ? 'btn-primary' : 'btn-light' %> rounded border" href="<%= secondIndex %>">
+                <%= (Math.floor(page / 3) * 3) + 2 %>
+            </a>
+            <a class="btn btn-sm <%= page === (Math.floor(page / 3) * 3) + 2 ? 'btn-primary' : 'btn-light' %> rounded border" href="<%= thirdIndex %>">
+                <%= (Math.floor(page / 3) * 3) + 3 %>
+            </a>
+            <a class="btn btn-sm btn-light rounded border" href="<%= nextIndex %>" data-bs-toggle="tooltip" data-bs-title="Next">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+<%- include('../partials/footer.ejs', {
+    scripts: [ '/public/scripts/settings/entryList.js' ]
+}); -%>

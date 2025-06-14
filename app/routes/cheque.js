@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
-const cityModel = require('../models/city');
+const chequeModel   = require('../models/cheque');
+const supplierModel = require('../models/supplier');
 
 
 router.use((req, res, next) => {
@@ -24,12 +25,15 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const [cities] = await cityModel.fetch({ search, page });
-        res.render(`settings/cityEntryList`, { 
+        const [suppliers] = await supplierModel.fetchAll();
+        const [cheques] = await chequeModel.fetch({ search, page });
+
+        res.render(`settings/chequeEntryList`, { 
             baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
             user: req.session.user,
             alert, 
-            cities 
+            suppliers,
+            cheques 
         });
     }
     catch(error) {
@@ -44,21 +48,21 @@ router.get('/', async (req, res) => {
 
 router.post(`/ajoute`, async (req, res) => {
     try {
-        const [result] = await cityModel.insert(req.body);
+        const [result] = await chequeModel.insert(req.body);
 
         req.session.alert = {
             type: 'success',
-            message: 'The city has been created successfully.'
+            message: 'The cheque has been created successfully.'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The city was not created, please try again.'
+                message: 'The cheque was not created, please try again.'
             };
         }
 
-        res.redirect('/parametres/ville');
+        res.redirect('/parametres/cheque');
     } 
     catch(error) {
         res.statusCode = 500;
@@ -72,21 +76,21 @@ router.post(`/ajoute`, async (req, res) => {
 
 router.post('/modifie', async (req, res) => {
     try {
-        const [result] = await cityModel.update(req.body);
+        const [result] = await chequeModel.update(req.body);
 
         req.session.alert = {
             type: 'success',
-            message: 'The city has been updated successfully.'
+            message: 'The cheque has been updated successfully.'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The city was not updated, please try again.'
+                message: 'The cheque was not updated, please try again.'
             };
         }
 
-        res.redirect('/parametres/ville');
+        res.redirect('/parametres/cheque');
     }
     catch(error) {
         res.statusCode = 500;
@@ -103,21 +107,21 @@ router.get('/supprime', async (req, res) => {
     id = id ? parseInt(id, 10) : -1;
 
     try {
-        const [result] = await cityModel.delete(id);
+        const [result] = await chequeModel.delete(id);
 
         req.session.alert = {
             type: 'success',
-            message: 'The city has been deleted successfully.'
+            message: 'The cheque has been deleted successfully.'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The city was not deleted, please try again.'
+                message: 'The cheque was not deleted, please try again.'
             };
         }
 
-        res.redirect('/parametres/ville');
+        res.redirect('/parametres/cheque');
     }
     catch (error) {
         if(error.code === 'ER_ROW_IS_REFERENCED_2' || 
@@ -125,13 +129,13 @@ router.get('/supprime', async (req, res) => {
             
             req.session.alert = {
                 type: 'danger',
-                message: 'Cannot delete this city because it is linked to other data. Please remove all related records first.'
+                message: 'Cannot delete this cheque because it is linked to other data. Please remove all related records first.'
             };
 
-            res.redirect('/parametres/ville');
+            res.redirect('/parametres/cheque');
             return;
         }
-
+        
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',

@@ -1,36 +1,29 @@
 const nodemailer = require('nodemailer');
 
 module.exports = async function sendGmail(data = {}, callback = () => {}) {
-    let { 
+    const { 
         username, password , 
-        sender  , recipient, 
-        subject , text,      html
+        sender  , recipient, subject, 
+        text    , html
     } = data;
 
     if (!username || !password || !recipient || !subject) {
-        const msg = "Missing required email configuration fields.";
-        console.error(`[${new Date().toISOString()}] ${msg}`);
-        return callback(new Error(msg), null);
+        return callback(null, new Error(`Missing required email configuration fields.`));
     }
 
     let transporter = nodemailer.createTransport({
         service: 'gmail',
-        auth: {
-            user: username,
-            pass: password,
-        },
+        auth: { user: username, pass: password },
     });
 
-    let mailOptions = {
-        from    : sender || username,
-        to      : recipient,
-        subject : subject,
-        text    : text ?? '',
-        html    : html ?? ''
-    };
-
     try {
-        let info = await transporter.sendMail(mailOptions);
+        let info = await transporter.sendMail({
+            from    : sender || username,
+            to      : recipient,
+            subject : subject,
+            text    : text ?? '',
+            html    : html ?? ''
+        });
         callback(info, null);
     } 
     catch (error) {

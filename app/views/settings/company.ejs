@@ -1,13 +1,40 @@
-<%- include('../partials/header.ejs', {
-        tabs: [
-            { title: 'Societe' , url: '/parametres/societe' }, 
-            { title: 'Ville'   , url: '/parametres/ville' }
-        ]
-    }); -%>
+<%- include('../partials/head.ejs') -%>
+
+    <!-- "Aside" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/aside.ejs') -%>
+
+    <!-- "Header" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/header.ejs', {
+            tabs: [
+                { title: 'Societe'        , url: '/parametres/societe'     }, 
+                { title: 'Ville'          , url: '/parametres/ville'       },
+                { title: 'Personnel'      , url: '/parametres/personnel'   },
+                { title: 'Plan Comptable' , url: '/parametres/comptable'   },
+                { title: 'Fournisseur'    , url: '/parametres/fournisseur' },
+                { title: 'Prime'          , url: '/parametres/prime'       },
+                { title: 'Cheque'         , url: '/parametres/cheque'      },
+                { title: 'Absence'        , url: '/parametres/absence'     }
+            ]
+        }); -%>
+
+    <!-- "Main" 
+    ----------------------------------------------------------------------->
+
     <main class="p-3">
+
+        <!-- "Form" 
+        ----------------------------------------------------------------------->
+
         <form class="shadow rounded p-4" action="/parametres/societe" method="POST">
             <h4 class="mb-3">Company's Details</h4>
 
+            <!-- "Alert" 
+            ----------------------------------------------------------------------->
+            
             <% if(alert) { %>
                 <div class="alert alert-<%= alert.type %> alert-dismissible fade show">
                     <%= alert.message %>
@@ -73,4 +100,5 @@
             </div>
         </form>
     </main>
+
 <%- include('../partials/footer.ejs'); -%>

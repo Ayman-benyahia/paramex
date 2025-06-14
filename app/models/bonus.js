@@ -1,10 +1,10 @@
 const dbh = require('../utilities/dbh');
 
 module.exports = {
-    fetchAll: (data) => {
+    fetch: (data) => {
         const { search, page } = data;
         const LIMIT = 20;
-        let offset  = page * LIMIT;
+        const OFFSET = page * LIMIT;
 
         const SQL_FETCH_BONUSES = `
             SELECT * 
@@ -21,8 +21,13 @@ module.exports = {
             `%${search}%`,
             `%${search}%`,
             `%${search}%`,
-            offset 
+            OFFSET 
         ]);
+    },
+
+    fetchAll: () => {
+        const SQL_FETCH_BONUSES = `SELECT * FROM bonus`;
+        return dbh.query(SQL_FETCH_BONUSES);
     },
 
     fetchSingle: (id) => {

@@ -1,32 +1,39 @@
 const dbh = require('../utilities/dbh');
 
 module.exports = {
-    fetchAll: (data) => {
-        const { search, page } = data;
+    fetch: (data) => {
+        const { search, page, archive, trash } = data;
         const LIMIT = 20;
-        let offset = page * LIMIT;
+        const OFFSET = page * LIMIT;
 
         const SQL_FETCH_EMPLOYEES = `
-            SELECT emp.*, 
-                   cit.name AS city
+            SELECT emp.*,
+                   DATE_FORMAT(emp.hire_date, '%d-%m-%Y') AS hire_date,
+                   cit.name AS city,
+                   rol.*,
+                   emp.id AS id
             FROM   employee AS emp
             JOIN   city     AS cit
             ON     emp.city_id = cit.id
+            JOIN   roles AS rol
+            ON     rol.employee_id = emp.id
             WHERE  (
                 cit.name  LIKE ?  OR
                 fullname  LIKE ?  OR
                 job_title LIKE ?  OR
-                password  LIKE ?  OR
                 phone_1   LIKE ?  OR
                 phone_2   LIKE ?  OR
                 address   LIKE ?  OR
                 CAST(salary AS CHAR) LIKE ?  OR
-                hire_date LIKE ?
-            ) AND (
-                is_deleted  = 0 AND 
-                is_archived = 0
+                STR_TO_DATE(emp.hire_date, '%d-%m-%Y') LIKE ?
+            ) 
+            AND job_title != 'administrator' 
+            AND ( 
+                (is_deleted = 0 AND is_archived = 0)
+                OR (? = 1 AND is_archived = 1)
+                OR (? = 1 AND is_deleted  = 1)
             )
-            LIMIT  ?, 20
+            LIMIT ?, 20
         `;
 
         return dbh.query(
@@ -39,20 +46,51 @@ module.exports = {
                 `%${search}%`,
                 `%${search}%`,
                 `%${search}%`,
-                `%${search}%`,
-                offset
+                archive ?? 0, 
+                trash   ?? 0,
+                OFFSET
             ]
         );
+    },
+
+    fetchAll: () => {
+        const SQL_FETCH_EMPLOYEES = `
+            SELECT emp.*,
+                   DATE_FORMAT(emp.hire_date, '%d-%m-%Y') AS hire_date,
+                   cit.name AS city,
+                   rol.*,
+                   emp.id AS id
+            FROM   employee AS emp
+            JOIN   city     AS cit
+            ON     emp.city_id = cit.id
+            JOIN   roles AS rol
+            ON     rol.employee_id = emp.id
+            WHERE  (
+                job_title  != 'administrator' AND
+                is_deleted  = 0 AND 
+                is_archived = 0
+            )
+        `;
+        return dbh.query(SQL_FETCH_EMPLOYEES);
     },
 
     fetchSingle: (id) => {
         const SQL_FETCH_EMPLOYEE = `
             SELECT emp.*, 
-                   cit.name AS city
+                   DATE_FORMAT(emp.hire_date, '%d-%m-%Y') AS hire_date,
+                   cit.name AS city,
+                   rol.*,
+                   emp.id AS id
             FROM   employee AS emp 
             JOIN   city     AS cit
             ON     emp.city_id = cit.id
-            WHERE  id = ? AND is_deleted = 0 AND is_archived = 0
+            JOIN   roles AS rol
+            ON     rol.employee_id = emp.id
+            WHERE  emp.id = ? AND ( 
+                job_title  != 'administrator' AND
+                is_deleted  = 0 AND 
+                is_archived = 0
+            )
         `;
         return dbh.query(SQL_FETCH_EMPLOYEE, [ id ]);
     },
@@ -63,6 +101,7 @@ module.exports = {
             password, phone_1,  phone_2,
             address,  salary,   hire_date
         } = data;
+        
 
         let result = null;
         const connection = await dbh.getConnection();
@@ -79,7 +118,7 @@ module.exports = {
                 VALUES (
                     ?, ?, ?, 
                     ?, ?, ?, 
-                    ?, ?, ?
+                    ?, ?, STR_TO_DATE(?, '%d-%m-%Y')
                 )
             `;
 
@@ -100,7 +139,8 @@ module.exports = {
                 VALUES (
                     0, 0, 0, 
                     0, 0, 0,
-                    0, 0, 0, ?
+                    0, 0, 0, 
+                    ?
                 )
             `;
 
@@ -144,11 +184,11 @@ module.exports = {
         } = data;
 
         const SQL_UPDATE_EMPLOYEE = `
-            UPDATE employee SET
-                city_id  = ?, fullname = ?, job_title = ?, 
-                password = ?, phone_1  = ?, phone_2   = ?, 
-                address  = ?, salary   = ?, hire_date = ?
-            WHERE id = ?
+            UPDATE employee 
+            SET    city_id  = ?, fullname = ?, job_title = ?, 
+                   password = ?, phone_1  = ?, phone_2   = ?, 
+                   address  = ?, salary   = ?, hire_date = STR_TO_DATE(?, '%d-%m-%Y')
+            WHERE  id = ?
         `;
 
         return dbh.query(SQL_UPDATE_EMPLOYEE, [
@@ -158,8 +198,56 @@ module.exports = {
         ]);
     },
 
+    updateRoles: (data) => {
+        const { 
+            employee_id,
+            can_add_simple_purchase,
+            can_modify_simple_purchase,
+            can_delete_simple_purchase,
+            can_add_delivery,
+            can_modify_delivery,
+            can_delete_delivery,
+            can_add_invoice,
+            can_modify_invoice,
+            can_delete_invoice
+        } = data;
+
+        const SQL_UPDATE_EMPLOYEE_ROLES = `
+            UPDATE roles 
+            SET    can_add_simple_purchase    = ?,
+                   can_modify_simple_purchase = ?,
+                   can_delete_simple_purchase = ?,
+                   can_add_delivery           = ?,
+                   can_modify_delivery        = ?,
+                   can_delete_delivery        = ?,
+                   can_add_invoice            = ?,
+                   can_modify_invoice         = ?,
+                   can_delete_invoice         = ?
+            WHERE  employee_id = ?
+        `;
+
+        return dbh.query(SQL_UPDATE_EMPLOYEE_ROLES, [
+            can_add_simple_purchase    ?? 0,
+            can_modify_simple_purchase ?? 0,
+            can_delete_simple_purchase ?? 0,
+            can_add_delivery           ?? 0,
+            can_modify_delivery        ?? 0,
+            can_delete_delivery        ?? 0,
+            can_add_invoice            ?? 0,
+            can_modify_invoice         ?? 0,
+            can_delete_invoice         ?? 0,
+            employee_id
+        ]);
+    },
+
     delete: (id) => {
-        const SQL_DELETE_EMPLOYEE = `DELETE FROM employee WHERE id = ? AND (is_archived = 0 || is_deleted = 0)`;
+        const SQL_DELETE_EMPLOYEE = `
+            DELETE FROM employee WHERE id = ? AND ( 
+                job_title  != 'administrator' AND
+                is_archived = 0 AND 
+                is_deleted  = 0
+            )
+        `;
         return dbh.query(SQL_DELETE_EMPLOYEE, [ id ]);
     },
 

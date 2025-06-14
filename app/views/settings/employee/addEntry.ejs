@@ -1,0 +1,93 @@
+<%- include('../../partials/head.ejs') -%>
+
+    <!-- "Aside" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../../partials/aside.ejs') -%>
+
+    <!-- "Header" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../../partials/header.ejs') -%>
+
+    <!-- "Main" 
+    ----------------------------------------------------------------------->
+
+    <main class="p-3">
+        <form class="shadow rounded p-4" action="/parametres/personnel/ajoute" method="POST">
+
+            <% if(alert) { %>
+                <div class="alert alert-<%= alert.type %> alert-dismissible fade show">
+                    <%= alert.message %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+
+            <div class="mb-3">
+                <label for="fullname" class="form-label">Full Name</label>
+                <input class="form-control" name="fullname" id="fullname" type="text">
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input class="form-control" name="password" id="password" type="text">
+            </div>
+
+            <div class="mb-3">
+                <label for="job_title" class="form-label">Job Title</label>
+                <select class="form-select" name="job_title" id="job_title">
+                    <option value="none" selected disabled>Select job title</option>
+                    <option value="administrator">Administrator</option>
+                    <option value="manager">Manager</option>
+                    <option value="accountant">Accountant</option>
+                    <option value="storekeeper">Storekeeper</option>
+                    <option value="internal_sales_representative">Internal Sales Rep</option>
+                    <option value="external_sales_representative">External Sales Rep</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="hire_date" class="form-label">Hire Date</label>
+                <input class="form-control" name="hire_date" id="hire_date" type="text">
+            </div>
+
+            <div class="mb-3">
+                <label for="salary" class="form-label">Salary</label>
+                <input class="form-control" name="salary" id="salary" type="text">
+            </div>
+
+            <div class="mb-3">
+                <label for="phone_1" class="form-label">Phone 1</label>
+                <input class="form-control" name="phone_1" id="phone_1" type="text">
+            </div>
+
+            <div class="mb-3">
+                <label for="phone_2" class="form-label">Phone 2</label>
+                <input class="form-control" name="phone_2" id="phone_2" type="text">
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control" name="address" id="address" rows="1"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="city_id" class="form-label">City</label>
+                <select class="form-select" name="city_id" id="city_id" required>
+                    <option value="none" selected disabled>Select a city</option>
+                    <% for(let city of cities) { %>
+                        <option value="<%= city.id %>">
+                            <%= city.name %>
+                        </option>
+                    <% } %>
+                </select>
+            </div>
+
+            <div class="d-flex gap-2 justify-content-start align-items-baseline">
+                <button class="btn btn-primary">Save</button>
+                <a class="btn btn-light" href="/parametres/personnel">Back</a>
+            </div>
+        </form>
+    </main>
+
+<%- include('../../partials/footer.ejs'); -%>

@@ -1,8 +1,8 @@
 const dbh = require('../utilities/dbh');
 
 module.exports = {
-    fetchAll: (data) => {
-        const { search, page } = data;
+    fetch: (data) => {
+        const { search, page, archive, trash } = data;
         const LIMIT  = 20;
         const OFFSET = page * LIMIT;
 
@@ -12,22 +12,23 @@ module.exports = {
                    acc.designation AS accountant
             FROM   supplier AS sup
             JOIN   city AS cit 
-            ON     sup.city_id = cit.id,
+            ON     sup.city_id = cit.id
             JOIN   accountant AS acc
-            ON     sup.account_id = acc.id
+            ON     sup.accountant_id = acc.id
             WHERE (
                 cit.name        LIKE ? OR
                 acc.designation LIKE ? OR
-                name            LIKE ? OR
-                company_registration_number LIKE ? OR
-                phone_1         LIKE ? OR
-                phone_2         LIKE ? OR
-                address         LIKE ? OR
-                email           LIKE ?
+                sup.name        LIKE ? OR
+                sup.company_registration_number LIKE ? OR
+                sup.phone_1     LIKE ? OR
+                sup.phone_2     LIKE ? OR
+                sup.address     LIKE ? OR
+                sup.email       LIKE ?
             ) 
-            AND (
-                is_archived = 0 AND
-                is_deleted  = 0 
+            AND ( 
+                (sup.is_deleted = 0 AND sup.is_archived = 0)
+                OR (? = 1 AND sup.is_archived = 1)
+                OR (? = 1 AND sup.is_deleted  = 1)
             )
             LIMIT ?, 20
         `;
@@ -41,8 +42,28 @@ module.exports = {
             `%${search}%`,
             `%${search}%`,
             `%${search}%`,
+            archive ?? 0,
+            trash ?? 0,
             OFFSET
         ]);
+    },
+
+    fetchAll: () => {
+        const SQL_FETCH_SUPPLIERS = `
+            SELECT sup.*, 
+                   cit.name AS city, 
+                   acc.designation AS accountant
+            FROM   supplier AS sup
+            JOIN   city AS cit 
+            ON     sup.city_id = cit.id
+            JOIN   accountant AS acc
+            ON     sup.accountant_id = acc.id
+            WHERE  (
+                sup.is_archived = 0 AND
+                sup.is_deleted  = 0 
+            )
+        `;
+        return dbh.query(SQL_FETCH_SUPPLIERS, []);
     },
 
     fetchSingle: (id) => {
@@ -52,10 +73,13 @@ module.exports = {
                    acc.designation AS accountant
             FROM   supplier AS sup
             JOIN   city AS cit 
-            ON     sup.city_id = cit.id,
+            ON     sup.city_id = cit.id
             JOIN   accountant AS acc
-            ON     sup.account_id = acc.id
-            WHERE  id = ? AND ( is_archived = 0 AND is_deleted = 0 )
+            ON     sup.accountant_id = acc.id
+            WHERE  id = ? AND ( 
+                sup.is_archived = 0 AND 
+                sup.is_deleted  = 0 
+            )
         `;
         return dbh.query(SQL_FETCH_SUPPLIER, [ id ]);
     },
@@ -124,7 +148,7 @@ module.exports = {
                    phone_2       = ?,
                    address       = ?,
                    email         = ?
-            WHERE  id            = ?
+            WHERE  id = ?
         `;
 
         return dbh.query(SQL_INSERT_SUPPLIER, [  

@@ -1,6 +1,6 @@
 const router = require('express').Router();
 
-const cityModel = require('../models/city');
+const bonusModel = require('../models/bonus');
 
 
 router.use((req, res, next) => {
@@ -24,12 +24,12 @@ router.get('/', async (req, res) => {
     }
 
     try {
-        const [cities] = await cityModel.fetch({ search, page });
-        res.render(`settings/cityEntryList`, { 
+        const [bonuses] = await bonusModel.fetch({ search, page });
+        res.render(`settings/bonusEntryList`, { 
             baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
             user: req.session.user,
             alert, 
-            cities 
+            bonuses 
         });
     }
     catch(error) {
@@ -44,21 +44,21 @@ router.get('/', async (req, res) => {
 
 router.post(`/ajoute`, async (req, res) => {
     try {
-        const [result] = await cityModel.insert(req.body);
+        const [result] = await bonusModel.insert(req.body);
 
         req.session.alert = {
             type: 'success',
-            message: 'The city has been created successfully.'
+            message: 'The bonus has been created successfully.'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The city was not created, please try again.'
+                message: 'The bonus was not created, please try again.'
             };
         }
 
-        res.redirect('/parametres/ville');
+        res.redirect('/parametres/prime');
     } 
     catch(error) {
         res.statusCode = 500;
@@ -72,21 +72,21 @@ router.post(`/ajoute`, async (req, res) => {
 
 router.post('/modifie', async (req, res) => {
     try {
-        const [result] = await cityModel.update(req.body);
+        const [result] = await bonusModel.update(req.body);
 
         req.session.alert = {
             type: 'success',
-            message: 'The city has been updated successfully.'
+            message: 'The bonus has been updated successfully.'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The city was not updated, please try again.'
+                message: 'The bonus was not updated, please try again.'
             };
         }
 
-        res.redirect('/parametres/ville');
+        res.redirect('/parametres/prime');
     }
     catch(error) {
         res.statusCode = 500;
@@ -103,21 +103,21 @@ router.get('/supprime', async (req, res) => {
     id = id ? parseInt(id, 10) : -1;
 
     try {
-        const [result] = await cityModel.delete(id);
+        const [result] = await bonusModel.delete(id);
 
         req.session.alert = {
             type: 'success',
-            message: 'The city has been deleted successfully.'
+            message: 'The bonus has been deleted successfully.'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The city was not deleted, please try again.'
+                message: 'The bonus was not deleted, please try again.'
             };
         }
 
-        res.redirect('/parametres/ville');
+        res.redirect('/parametres/prime');
     }
     catch (error) {
         if(error.code === 'ER_ROW_IS_REFERENCED_2' || 
@@ -125,13 +125,13 @@ router.get('/supprime', async (req, res) => {
             
             req.session.alert = {
                 type: 'danger',
-                message: 'Cannot delete this city because it is linked to other data. Please remove all related records first.'
+                message: 'Cannot delete this bonus because it is linked to other data. Please remove all related records first.'
             };
 
-            res.redirect('/parametres/ville');
+            res.redirect('/parametres/prime');
             return;
         }
-
+        
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',

@@ -1,0 +1,22 @@
+<aside class="p-3 border-end">
+    <h4 class="ms-3">Paramex</h4>
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link <%= baseUrl.pathname.startsWith('/dashboard') ? 'active rounded bg-primary-subtle' : '' %>" href="/dashboard">
+                Dashboard
+            </a>
+        </li>
+        <li class="nav-item">
+            <% if(user.job_title === 'administrator') { %>
+                <a class="nav-link <%= baseUrl.pathname.startsWith('/parametres') ? 'active rounded bg-primary-subtle' : '' %>" href="/parametres/societe">
+                    Parametres
+                </a>
+            <% } %>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link <%= baseUrl.pathname.startsWith('/repertoire') ? 'active rounded bg-primary-subtle' : '' %>" href="/repertoire">
+                Repertoire
+            </a>
+        </li>
+    </ul>
+</aside>

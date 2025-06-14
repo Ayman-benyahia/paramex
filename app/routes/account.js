@@ -1,6 +1,6 @@
+const router = require('express').Router();
+
 const dbh = require('../utilities/dbh');
-const express = require('express');
-const router = express.Router();
 
 
 router.use((req, res, next) => {
@@ -26,18 +26,18 @@ router.get('/', async (req, res) => {
         employee = records[0] || null;
     }
     catch(error) {
-        console.error(`[${new Date().toISOString()}] Failed to retrieve admin data from the database.`, error);
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
-            description: 'An unexpected error occurred while loading admin information. Please try again later.',
-            backURL: '/dashboard'
+            description: '',
+            backUrl: '/dashboard'
         });
         return;
     }
 
     res.render('account', {
         user: req.session.user,
+        baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
         alert,
         employee
     });
@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
 
     try {
         const SQL_UPDATE_ADMIN_ACCOUNT = `UPDATE employee SET fullname=?, password=? WHERE id = ?`;
-        let [ results ] = await dbh.query(SQL_UPDATE_ADMIN_ACCOUNT, [fullname, password, parseInt(id, 10)]);
+        const [results] = await dbh.query(SQL_UPDATE_ADMIN_ACCOUNT, [fullname, password, parseInt(id, 10)]);
 
         req.session.alert = {
             type: 'success', 
@@ -58,12 +58,11 @@ router.post('/', async (req, res) => {
         res.redirect('/account');
     }
     catch(error) {
-        console.error(`[${new Date().toISOString()}] Failed to update admin's account information.`, error);
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
-            description: 'An unexpected error occurred while updating the account. Please try again later.',
-            backURL: '/dashboard'
+            description: '',
+            backUrl: '/dashboard'
         });
         return;
     }

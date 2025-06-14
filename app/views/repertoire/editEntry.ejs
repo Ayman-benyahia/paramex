@@ -1,0 +1,112 @@
+<%- include('../partials/head.ejs') -%>
+
+    <!-- "Aside" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/aside.ejs') -%>
+
+    <!-- "Header" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/header.ejs') -%>
+
+    <!-- "Main" 
+    ----------------------------------------------------------------------->
+
+    <main class="p-3">
+        <form class="shadow rounded p-4" action="/repertoire/modifie" method="POST">
+
+            <% if(alert) { %>
+                <div class="alert alert-<%= alert.type %> alert-dismissible fade show">
+                    <%= alert.message %>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <% } %>
+
+            <input name="id" type="hidden" value="<%= _client?.id ?? -1 %>">
+
+            <div class="mb-3">
+                <label class="form-label" for="cityIdSelect">Ville</label>
+                <select class="form-select" name="city_id" id="cityIdSelect">
+                    <option value="-1" selected disabled>Aucun</option>
+                    <% for(let i = 0; i < cities.length; i++) { %>
+                        <option value="<%= cities[i].id %>" <%= cities[i].id === _client?.city_id ? 'selected' : '' %>>
+                            <%= cities[i].name %>
+                        </option>
+                    <% } %>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="clientTypeInput">Client</label>
+                <select class="form-select" name="client_type" id="clientTypeInput">
+                    <option value="-1" selected disabled>Aucun</option>
+                    <option value="pharmacy"  <%= _client?.client_type === 'pharmacy'  ? 'selected' : '' %>>Pharmacy</option>
+                    <option value="reseller"  <%= _client?.client_type === 'reseller'  ? 'selected' : '' %>>Reseller</option>
+                    <option value="transport" <%= _client?.client_type === 'transport' ? 'selected' : '' %>>Transport</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="nameInput">Designation</label>
+                <input class="form-control" name="name" id="nameInput" type="text" value="<%= _client?.name ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="crnInput">ICE</label>
+                <input class="form-control" name="company_registration_number" id="crnInput" type="text" value="<%= _client?.company_registration_number ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="phone1Input">Tel 1</label>
+                <input class="form-control" name="phone_1" id="phone1Input" type="text" value="<%= _client?.phone_1 ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="phone1OwnerInput">Tel 1 titulaire</label>
+                <input class="form-control" name="phone_1_owner" id="phone1OwnerInput" type="text" value="<%= _client?.phone_1_owner ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="phone2Input">Tel 2</label>
+                <input class="form-control" name="phone_2" id="phone2Input" type="text" value="<%= _client?.phone_2 ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="phone2OwnerInput">Tel 2 titulaire</label>
+                <input class="form-control" name="phone_2_owner" id="phone2OwnerInput" type="text" value="<%= _client?.phone_2_owner ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="phone3Input">Tel 3</label>
+                <input class="form-control" name="phone_3" id="phone3Input" type="text" value="<%= _client?.phone_3 ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="phone3OwnerInput">Tel 3 titulaire</label>
+                <input class="form-control" name="phone_3_owner" id="phone3OwnerInput" type="text" value="<%= _client?.phone_3_owner ?? '' %>">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="addressInput">Adresse</label>
+                <textarea class="form-control" name="address" id="addressInput" rows="1"><%= _client?.address ?? '' %></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="commentInput">Commentaire</label>
+                <textarea class="form-control" name="comment" id="commentInput" rows="1"><%= _client?.comment ?? '' %></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="purchaseCountInput">Nombre achat</label>
+                <input class="form-control" name="purchase_count" id="purchaseCountInput" type="text" value="<%= _client?.purchase_count ?? '' %>">
+            </div>
+
+            <div class="d-flex gap-2 justify-content-start align-items-baseline">
+                <button class="btn btn-primary">Save</button>
+                <a class="btn btn-light border" href="/repertoire">Back</a>
+            </div>
+        </form>
+    </main>
+
+<%- include('../partials/footer.ejs'); -%>

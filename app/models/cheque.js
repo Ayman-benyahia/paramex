@@ -1,13 +1,14 @@
 const dbh = require('../utilities/dbh');
 
 module.exports = {
-    fetchAll: (data) => {
+    fetch: (data) => {
         const { search, page } = data;
         const LIMIT  = 20;
         const OFFSET = page * LIMIT;
 
         const SQL_FETCH_CHEQUES = `
             SELECT che.*, 
+                   DATE_FORMAT(che.issue_date, '%d-%m-%Y') AS issue_date,
                    sup.name AS supplier
             FROM   cheque   AS che
             JOIN   supplier AS sup
@@ -16,7 +17,7 @@ module.exports = {
                     sup.name             LIKE ? OR
                     CAST(number AS CHAR) LIKE ? OR
                     CAST(amount AS CHAR) LIKE ? OR
-                    issue_date           LIKE ?
+                    STR_TO_DATE(che.issue_date, '%d-%m-%Y') LIKE ?
                 )
             LIMIT  ?, 20
         `;
@@ -30,9 +31,22 @@ module.exports = {
         ]);
     },
 
+    fetchAll: () => {
+        const SQL_FETCH_CHEQUES = `
+            SELECT che.*, 
+                   DATE_FORMAT(che.issue_date, '%d-%m-%Y') AS issue_date,
+                   sup.name AS supplier
+            FROM   cheque   AS che
+            JOIN   supplier AS sup
+            ON     che.supplier_id = sup.id
+        `;
+        return dbh.query(SQL_FETCH_CHEQUES, []);
+    },
+
     fetchSingle: (id) => {
         const SQL_FETCH_CHEQUE = `
             SELECT che.*, 
+                   DATE_FORMAT(che.issue_date, '%d-%m-%Y') AS issue_date,
                    sup.name AS supplier
             FROM   cheque   AS che
             JOIN   supplier AS sup
@@ -60,7 +74,7 @@ module.exports = {
                 is_settled
             ) 
             VALUES (
-                ?, ?, ?, ?, ?
+                ?, ?, ?, STR_TO_DATE(?, '%d-%m-%Y'), ?
             )
         `;
 
@@ -69,7 +83,7 @@ module.exports = {
             number,
             amount,
             issue_date,
-            is_settled
+            is_settled ?? 0
         ]);
     },
 
@@ -88,7 +102,7 @@ module.exports = {
             SET    supplier_id = ?,
                    number      = ?,
                    amount      = ?,
-                   issue_date  = ?,
+                   issue_date  = STR_TO_DATE(?, '%d-%m-%Y'),
                    is_settled  = ?
             WHERE  id = ?
         `;
@@ -98,7 +112,7 @@ module.exports = {
             number,
             amount,
             issue_date,
-            is_settled,
+            is_settled ?? 0,
             id
         ]);
     },
@@ -109,7 +123,10 @@ module.exports = {
             FROM   cheque   AS che
             JOIN   supplier AS sup
             ON     che.supplier_id = sup.id
-            WHERE  che.id = ? AND ( sup.is_deleted = 0 AND sup.is_archived = 0 )
+            WHERE  che.id = ? AND ( 
+                sup.is_deleted  = 0 AND 
+                sup.is_archived = 0 
+            )
         `;
         return dbh.query(SQL_DELETE_CHEQUE, [ id ]);
     }

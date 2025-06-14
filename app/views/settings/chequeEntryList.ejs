@@ -1,0 +1,314 @@
+<%- include('../partials/head.ejs') -%>
+
+    <!-- "Add Entry Modal" 
+    ----------------------------------------------------------------------->
+    
+    <div class="modal fade" id="addEntryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" action="/parametres/cheque/ajoute" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Cheque</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">                    
+                    <div class="mb-3">
+                        <label class="form-label" for="supplierSelect">Fournisseur</label>
+                        <select class="form-select" name="supplier_id" id="supplierSelect" type="text">
+                            <option value="-1" selected disabled>Aucun</option>
+                            <% for(let supplier of suppliers) { %>
+                                <option value="<%= supplier.id %>">
+                                    <%= supplier.name %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="numberInput">Numero</label>
+                        <input class="form-control" name="number" id="numberInput" type="text">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="amountInput">Montant</label>
+                        <input class="form-control" name="amount" id="amountInput" type="text">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="issueDateInput">Date demission</label>
+                        <input class="form-control" name="issue_date" id="issueDateInput" type="text">
+                    </div>
+
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" name="is_settled" id="isSettledCheckbox" type="checkbox" value="1">
+                        <label class="form-check-label" for="isSettledCheckbox">
+                            Regle / Non-Regle
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary">Proceed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- "Edit Entry Modal" 
+    ----------------------------------------------------------------------->
+
+    <div class="modal fade" id="editEntryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" action="/parametres/cheque/modifie" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Cheque's Details</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">                    
+                    <input name="id" type="hidden" value="">
+
+                    <div class="mb-3">
+                        <label class="form-label" for="supplierSelect">Fournisseur</label>
+                        <select class="form-select" name="supplier_id" id="supplierSelect" type="text">
+                            <option value="-1" selected disabled>Aucun</option>
+                            <% for(let supplier of suppliers) { %>
+                                <option value="<%= supplier.id %>">
+                                    <%= supplier.name %>
+                                </option>
+                            <% } %>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="numberInput">Numero</label>
+                        <input class="form-control" name="number" id="numberInput" type="text">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="amountInput">Montant</label>
+                        <input class="form-control" name="amount" id="amountInput" type="text">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="issueDateInput">Date demission</label>
+                        <input class="form-control" name="issue_date" id="issueDateInput" type="text">
+                    </div>
+                    
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" name="is_settled" id="isSettledCheckbox" type="checkbox" value="1">
+                        <label class="form-check-label" for="isSettledCheckbox">
+                            Regle / Non-Regle
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary">Apply Change</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- "Remove Entry Modal" 
+    ----------------------------------------------------------------------->
+
+    <div class="modal fade" id="removeEntryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form class="modal-content" action="/parametres/cheque/supprime" method="GET">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirm Cheque's Deletion</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input name="id" id="removeEntryModal-idInput" type="hidden" value="">
+                    <p>Do you really want to delete <output id="removeEntryModal-designationOutput"></output>?</p>
+                </div>
+                
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" type="button" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary">Proceed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- "Aside" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/aside.ejs') -%>
+
+    <!-- "Header" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/header.ejs', {
+            tabs: [
+                { title: 'Societe'        , url: '/parametres/societe'     }, 
+                { title: 'Ville'          , url: '/parametres/ville'       },
+                { title: 'Personnel'      , url: '/parametres/personnel'   },
+                { title: 'Plan Comptable' , url: '/parametres/comptable'   },
+                { title: 'Fournisseur'    , url: '/parametres/fournisseur' },
+                { title: 'Prime'          , url: '/parametres/prime'       },
+                { title: 'Cheque'         , url: '/parametres/cheque'      },
+                { title: 'Absence'        , url: '/parametres/absence'     }
+            ]
+        }); -%>
+
+    <!-- "Main" 
+    ----------------------------------------------------------------------->
+
+    <main class="p-3">
+
+        <!-- "Alert" 
+        ----------------------------------------------------------------------->
+        
+        <% if(alert) { %>
+            <div class="alert alert-<%= alert.type %> alert-dismissible fade show">
+                <%= alert.message %>
+                <button class="btn-close" type="button" data-bs-dismiss="alert"></button>
+            </div>
+        <% } %>
+
+        <header class="mb-3 d-flex gap-3 justify-content-between align-items-baseline">
+            <div class="d-flex gap-2">
+
+                <!-- "Add Button" 
+                ----------------------------------------------------------------------->
+                
+                <button class="btn btn-primary" id="addEntryModalTrigger" data-bs-toggle="tooltip" data-bs-title="Add">
+                    <i class="bi bi-plus"></i>
+                </button>
+                
+                <!-- "Search Bar" 
+                ----------------------------------------------------------------------->
+                
+                <div class="input-group" id="searchBar">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input class="form-control" name="search" id="searchBar-input" type="text" value="<%= baseUrl.searchParams.get('search') ?? '' %>" placeholder="Type a search...">
+                </div>
+
+                <!-- "Refresh Button" 
+                ----------------------------------------------------------------------->
+                
+                <a class="btn btn-light border" href="/parametres/cheque" data-bs-toggle="tooltip" data-bs-title="Refresh">
+                    <i class="bi bi-arrow-clockwise"></i>
+                </a>
+            </div>
+        </header>
+
+        <!-- "Tableau" 
+        ----------------------------------------------------------------------->
+        
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th class="bg-light text-secondary">Numero</th>
+                    <th class="bg-light text-secondary">Montant</th>
+                    <th class="bg-light text-secondary">Fournisseur</th>
+                    <th class="bg-light text-secondary">Date demission</th>
+                    <th class="bg-light text-secondary">Regle / Non-Regle</th>
+                    <th class="bg-light text-secondary">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% for(let cheque of cheques) { %>
+                    <tr>
+                        <input name="id" type="hidden" value="<%= cheque.id %>" disabled>
+                        <input name="designation" type="hidden" value="<%= cheque.number %>" disabled>
+                        <td>
+                            <%= cheque.number %>
+                            <input name="number" type="hidden" value="<%= cheque.number %>" disabled>
+                        </td>
+                        <td>
+                            <%= cheque.amount %>
+                            <input name="amount" type="hidden" value="<%= cheque.amount %>" disabled>
+                        </td>
+                        <td>
+                            <%= cheque.supplier %>
+                            <input name="supplier_id" type="hidden" value="<%= cheque.supplier_id %>" disabled>
+                        </td>
+                        <td>
+                            <%= cheque.issue_date %>
+                            <input name="issue_date" type="hidden" value="<%= cheque.issue_date %>" disabled>
+                        </td>
+                        <td>
+                            <span class="badge rounded-pill text-bg-<%= cheque.is_settled == 0 ? 'danger' : 'success' %>">
+                                <%= cheque.is_settled === '1' ? "Non-Regle" : "Regle"  %>
+                            </span>
+                            <input name="is_settled" type="hidden" value="<%= cheque.is_settled %>" disabled>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-secondary" 
+                                    name="editEntryModalTrigger"
+                                    style="--bs-btn-padding-y: .2rem; 
+                                           --bs-btn-padding-x: .3rem; 
+                                           --bs-btn-font-size: .5rem; 
+                                             margin-bottom   : .15rem;"
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-title="Edit">
+                                <i class="bi bi-pencil-fill"></i>
+                            </button>
+
+                            <button class="btn btn-sm btn-danger" 
+                                    name="removeEntryModalTrigger"
+                                    style="--bs-btn-padding-y: .2rem; 
+                                           --bs-btn-padding-x: .3rem; 
+                                           --bs-btn-font-size: .5rem; 
+                                             margin-bottom   : .15rem;" 
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-title="Remove">
+                                <i class="bi bi-trash3-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+
+        <!-- "Pagination" 
+        ----------------------------------------------------------------------->
+
+        <% 
+            let page = parseInt(baseUrl.searchParams.get('page') ?? 0, 10);
+
+            baseUrl.searchParams.set('page', Math.max((Math.floor(page / 3) * 3) - 3, 0));
+            let prevIndex   = baseUrl.toString();
+
+            baseUrl.searchParams.set('page', (Math.floor(page / 3) * 3) + 0);
+            let firstIndex  = baseUrl.toString();
+
+            baseUrl.searchParams.set('page', (Math.floor(page / 3) * 3) + 1);
+            let secondIndex = baseUrl.toString();
+
+            baseUrl.searchParams.set('page', (Math.floor(page / 3) * 3) + 2);
+            let thirdIndex  = baseUrl.toString();
+
+            baseUrl.searchParams.set('page', (Math.floor(page / 3) * 3) + 3);
+            let nextIndex   = baseUrl.toString();
+        %>
+
+        <div class="btn-group gap-2">
+            <a class="btn btn-sm btn-light rounded border" href="<%= prevIndex %>" data-bs-toggle="tooltip" data-bs-title="Previous">
+                <i class="bi bi-chevron-left"></i>
+            </a>
+            <a class="btn btn-sm <%= page === (Math.floor(page / 3) * 3) + 0 ? 'btn-primary' : 'btn-light' %> rounded border" href="<%= firstIndex %>">
+                <%= (Math.floor(page / 3) * 3) + 1 %>
+            </a>
+            <a class="btn btn-sm <%= page === (Math.floor(page / 3) * 3) + 1 ? 'btn-primary' : 'btn-light' %> rounded border" href="<%= secondIndex %>">
+                <%= (Math.floor(page / 3) * 3) + 2 %>
+            </a>
+            <a class="btn btn-sm <%= page === (Math.floor(page / 3) * 3) + 2 ? 'btn-primary' : 'btn-light' %> rounded border" href="<%= thirdIndex %>">
+                <%= (Math.floor(page / 3) * 3) + 3 %>
+            </a>
+            <a class="btn btn-sm btn-light rounded border" href="<%= nextIndex %>" data-bs-toggle="tooltip" data-bs-title="Next">
+                <i class="bi bi-chevron-right"></i>
+            </a>
+        </div>
+    </main>
+
+<%- include('../partials/footer.ejs', {
+    scripts: [ '/public/scripts/settings/entryList.js' ]
+}); -%>

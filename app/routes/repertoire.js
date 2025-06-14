@@ -1,7 +1,7 @@
 const router = require('express').Router();
-const { createHash } = require('crypto');
-const employeeModel = require('../models/employee');
-const cityModel     = require('../models/city');
+
+const repertoireModel = require('../models/repertoire');
+const cityModel       = require('../models/city');
 
 
 router.use((req, res, next) => {
@@ -13,23 +13,24 @@ router.use((req, res, next) => {
 });
 
 router.get('/', async (req, res) => {
-    let { search, page, archive, trash } = req.query;
+    let { search, page, trash, archive } = req.query;
     search = search ? search : '';
     page   = page   ? parseInt(page, 10) : 0;
 
     let alert = null;
+
     if(req.session.alert) {
         alert = req.session.alert;
         delete req.session.alert;
     }
 
     try {
-        const [employees] = await employeeModel.fetch({ search, page, archive, trash });
-        res.render(`settings/employee/entryList`, { 
+        const [clients] = await repertoireModel.fetch({ search, page, trash, archive });
+        res.render(`repertoire/entryList`, { 
             baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
             user: req.session.user,
             alert, 
-            employees 
+            clients 
         });
     }
     catch(error) {
@@ -43,16 +44,17 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/ajoute', async (req, res) => {
-    let alert  = null;
+    let alert = null;
 
     if(req.session.alert) {
         alert = req.session.alert;
         delete req.session.alert;
-    }
+    }    
 
-    try { 
+    try {
         const [cities] = await cityModel.fetchAll();
-        res.render('settings/employee/addEntry', {
+
+        res.render('repertoire/addEntry', {
             baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
             user: req.session.user,
             alert,
@@ -64,166 +66,172 @@ router.get('/ajoute', async (req, res) => {
         res.render('jumbotron', {
             title: '500 Internal Server Error',
             description: '',
-            backUrl: '/parametres/personnel'
+            backUrl: '/dashboard'
         });
     }
 });
 
-router.post('/ajoute', async (req, res) => {
-    const { password } = req.body;
+router.post(`/ajoute`, async (req, res) => {
     try {
-        req.body.password = createHash('sha256').update(password).digest('hex');
-        console.log(req.body.password);
-        const result = await employeeModel.insert(req.body);
+        const [result] = await repertoireModel.insert(req.body);
 
         req.session.alert = {
             type: 'success',
-            message: 'The employee has been created successfully!'
+            message: 'The client has been created successfully.'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
-                type: `warning`,
-                message: `The employee was not created, please try again.`
+                type: 'warning',
+                message: 'The client was not created, please try again.'
             };
         }
 
-        res.redirect('/parametres/personnel/ajoute');
-    }
+        res.redirect('/repertoire/ajoute');
+    } 
     catch(error) {
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
             description: '',
-            backUrl: '/parametres/personnel'
+            backUrl: '/dashboard'
         });
     }
 });
 
 router.get('/modifie', async (req, res) => {
-    let cities = [],
-        employee = null,
-        alert = null;
+    let { id } = req.query;
+    let alert  = null;
 
     if(req.session.alert) {
         alert = req.session.alert;
         delete req.session.alert;
-    }
+    }    
 
-    try { 
-        const [cityRecords] = await cityModel.fetchAll(); 
-        const [employeeRecords] = await employeeModel.fetchSingle(req.query.id);
-        cities = cityRecords;
-        employee = employeeRecords[0] ?? null;
+    try {
+        const [cities] = await cityModel.fetchAll();
+        const [clients] = await repertoireModel.fetchSingle(id);
+        let _client = clients[0] ?? null;
+
+        res.render('repertoire/editEntry', {
+            baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
+            user: req.session.user,
+            alert,
+            cities,
+            _client
+        });
     }
     catch(error) {
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
             description: '',
-            backUrl: '/parametres/personnel'
+            backUrl: '/dashboard'
         });
-        return;
     }
-
-    res.render('settings/employee/editEntry', {
-        baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
-        user: req.session.user,
-        alert,
-        cities,
-        employee
-    });
 });
 
 router.post('/modifie', async (req, res) => {
-    const { id, password } =  req.body;
+    let { id } = req.body;
 
     try {
-        req.body.password = createHash('sha256').update(password).digest('hex');
-        const [result] = await employeeModel.update(req.body);
+        const [result] = await repertoireModel.update(req.body);
 
         req.session.alert = {
             type: 'success',
-            message: 'Employee was updated successfully!'
+            message: 'The client has been updated successfully.'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'Employee was not updated, please try again.'
+                message: 'The client was not updated, please try again.'
             };
         }
 
-        res.redirect(`/parametres/personnel/modifie?id=${id}`);
-    }
-    catch(error) {
-        res.statusCode = 500;
-        res.render('jumbotron', {
-            title: '500 Internal Server Error',
-            description: ``,
-            backUrl: '/parametres/personnel'
-        });
-    }
-});
-
-router.post('/modifie/roles', async (req, res) => {
-    const { employee_id } = req.body;
-
-    try {
-        const [result] = await employeeModel.updateRoles(req.body);
-        
-        req.session.alert = {
-            type: 'success',
-            message: 'Roles were updated successfully!'
-        };
-
-        if(result.affectedRows === 0) {
-            req.session.alert = {
-                type: 'warning',
-                message: 'Roles were not updated, Please try again.'
-            };
-        }
-
-        res.redirect(`/parametres/personnel/modifie?id=${employee_id}`);
+        res.redirect(`/repertoire/modifie?id=${id}`);
     }
     catch(error) {
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
             description: '',
-            backUrl: '/parametres/personnel'
+            backUrl: '/dashboard'
         });
     }
 });
+
+// router.get('/supprime', async (req, res) => {
+//     let { id } = req.query;
+//     id = id ? parseInt(id, 10) : -1;
+
+//     try {
+//         const [result] = await repertoireModel.delete(id);
+
+//         req.session.alert = {
+//             type: 'success',
+//             message: 'The client has been deleted successfully.'
+//         };
+
+//         if(result.affectedRows === 0) {
+//             req.session.alert = {
+//                 type: 'warning',
+//                 message: 'The client was not deleted, please try again.'
+//             };
+//         }
+
+//         res.redirect('/repertoire');
+//     }
+//     catch (error) {
+//         if(error.code === 'ER_ROW_IS_REFERENCED_2' || 
+//             error.code === 'ER_ROW_IS_REFERENCED')  {
+            
+//             req.session.alert = {
+//                 type: 'danger',
+//                 message: 'Cannot delete this city because it is linked to other data. Please remove all related records first.'
+//             };
+
+//             res.redirect('/repertoire');
+//             return;
+//         }
+
+//         res.statusCode = 500;
+//         res.render('jumbotron', {
+//             title: '500 Internal Server Error',
+//             description: '',
+//             backUrl: '/dashboard'
+//         });
+//     }
+// });
 
 router.get('/archive', async (req, res) => {
     let { id } = req.query;
 
     try {
-        const [result] = await employeeModel.archive(id);
+        const [result] = await repertoireModel.archive(id);
 
         req.session.alert = {
             type: 'success',
-            message: 'The employee was archived successfully!'
+            message: 'The client was archived successfully!'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The employee was not archived, Please try again.'
+                message: 'The client was not archived, Please try again.'
             };
         }
 
         let baseUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
         baseUrl.searchParams.delete('id');
-        res.redirect(`/parametres/personnel?${baseUrl.searchParams.toString()}`);
+        res.redirect(`/repertoire?${baseUrl.searchParams.toString()}`);
     }
     catch(error) {
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
             description: '',
-            backUrl: '/parametres/personnel'
+            backUrl: '/repertoire'
         });
     }
 });
@@ -232,30 +240,30 @@ router.get('/desarchiver', async (req, res) => {
     let { id } = req.query;
 
     try {
-        const [result] = await employeeModel.unarchive(id);
+        const [result] = await repertoireModel.unarchive(id);
 
         req.session.alert = {
             type: 'success',
-            message: 'The employee was restored from archive successfully!'
+            message: 'The client was restored from archive successfully!'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The employee was not restored from the archive, Please try again.'
+                message: 'The client was not restored from the archive, Please try again.'
             };
         }
 
         let baseUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
         baseUrl.searchParams.delete('id');
-        res.redirect(`/parametres/personnel?${baseUrl.searchParams.toString()}`);
+        res.redirect(`/repertoire?${baseUrl.searchParams.toString()}`);
     }
     catch(error) {
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
             description: '',
-            backUrl: '/parametres/personnel'
+            backUrl: '/repertoire'
         });
     }
 });
@@ -264,52 +272,52 @@ router.get('/supprime', async (req, res) => {
     let { id } = req.query;
 
     try {
-        const [result] = await employeeModel.delete(id);
+        const [result] = await repertoireModel.delete(id);
 
         req.session.alert = {
             type: 'success',
-            message: 'Employee was deleted successfully!'
+            message: 'The client was deleted successfully!'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'Employee was not deleted, please try again.'
+                message: 'The client was not deleted, please try again.'
             };
         }
 
         let baseUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
         baseUrl.searchParams.delete('id');
-        res.redirect(`/parametres/personnel?${baseUrl.searchParams.toString()}`);
+        res.redirect(`/repertoire?${baseUrl.searchParams.toString()}`);
     }
     catch(error) {
         if(error.code === 'ER_ROW_IS_REFERENCED_2' || 
            error.code === 'ER_ROW_IS_REFERENCED')  {
             try {
-                const [result] = await employeeModel.dispose(id);
+                const [result] = await repertoireModel.dispose(id);
 
                 req.session.alert = {
                     type: 'success',
-                    message: 'Employee record is sent to trash successfully!'
+                    message: 'The client record is sent to trash successfully!'
                 };
 
                 if(result.affectedRows === 0) {
                     req.session.alert = {
                         type: 'warning',
-                        message: 'Employee was not put in the trash, please try again.'
+                        message: 'The client was not put in the trash, please try again.'
                     };
                 }
 
                 let baseUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
                 baseUrl.searchParams.delete('id');
-                res.redirect(`/parametres/personnel?${baseUrl.searchParams.toString()}`);
+                res.redirect(`/repertoire?${baseUrl.searchParams.toString()}`);
             }
             catch(subError) {
                 res.statusCode = 500;
                 res.render('jumbotron', {
                     title: '500 Internal Server Error',
                     description: ``,
-                    backUrl: '/parametres/personnel'
+                    backUrl: '/repertoire'
                 });
             }
 
@@ -320,7 +328,7 @@ router.get('/supprime', async (req, res) => {
         res.render('jumbotron', {
             title: '500 Internal Server Error',
             description: ``,
-            backUrl: '/parametres/personnel'
+            backUrl: '/repertoire'
         });
     }
 });
@@ -329,30 +337,30 @@ router.get('/restaurer', async (req, res) => {
     let { id } = req.query;
 
     try {
-        const [result] = await employeeModel.restore(id);
+        const [result] = await repertoireModel.restore(id);
 
         req.session.alert = {
             type: 'success',
-            message: 'The employee was restored successfully!'
+            message: 'The client was restored successfully!'
         };
 
         if(result.affectedRows === 0) {
             req.session.alert = {
                 type: 'warning',
-                message: 'The employee was not restored, Please try again.'
+                message: 'The client was not restored, Please try again.'
             };
         }
 
         let baseUrl = new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`);
         baseUrl.searchParams.delete('id');
-        res.redirect(`/parametres/personnel?` + baseUrl.searchParams.toString());
+        res.redirect(`/repertoire?` + baseUrl.searchParams.toString());
     }
     catch(error) {
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
             description: '',
-            backUrl: '/parametres/personnel'
+            backUrl: '/repertoire'
         });
     }
 });

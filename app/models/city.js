@@ -1,13 +1,18 @@
 const dbh = require('../utilities/dbh');
 
 module.exports = {
-    fetchAll: (data) => {
+    fetch: (data) => {
         const { search, page } = data;
         const LIMIT = 20;
         let offset = parseInt(page) * LIMIT;
 
         const SQL_FETCH_CITIES = `SELECT * FROM city WHERE name LIKE ? LIMIT ?, 20`;
         return dbh.query(SQL_FETCH_CITIES, [ `%${search}%`, offset ]);
+    },
+
+    fetchAll: () => {
+        const SQL_FETCH_CITIES = `SELECT * FROM city`;
+        return dbh.query(SQL_FETCH_CITIES, []);
     },
 
     fetchSingle: (id) => {

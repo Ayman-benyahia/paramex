@@ -1,25 +1,30 @@
-<%- include('../../partials/header.ejs', {
-        tabs: [
-            { title: 'Societe' , url: '/parametres/societe' }, 
-            { title: 'Ville'   , url: '/parametres/ville' }
-        ]
-    }); -%>
+<%- include('../partials/head.ejs') -%>
 
     <!-- "Add Entry Modal" 
     ----------------------------------------------------------------------->
     
     <div class="modal fade" id="addEntryModal" tabindex="-1">
         <div class="modal-dialog">
-            <form class="modal-content" action="/parametres/ville/ajoute" method="POST">
+            <form class="modal-content" action="/parametres/comptable/ajoute" method="POST">
                 <div class="modal-header">
-                    <h5 class="modal-title">Add New City</h5>
+                    <h5 class="modal-title">Add New Accountant</h5>
                     <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">                    
-                    <div class="mb-0">
-                        <label class="form-label" for="name">Nom</label>
-                        <input class="form-control" name="name" id="name" type="text" value="" placeholder="">
+                    <div class="mb-3">
+                        <label class="form-label" for="designationInput">Designation</label>
+                        <input class="form-control" name="designation" id="designationInput" type="text" value="">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="codeInput">Code</label>
+                        <input class="form-control" name="code" id="codeInput" type="text" value="">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="acnInput">Nature</label>
+                        <input class="form-control" name="account_classification_number" id="acnInput" type="text" value="">
                     </div>
                 </div>
                 
@@ -36,17 +41,28 @@
 
     <div class="modal fade" id="editEntryModal" tabindex="-1">
         <div class="modal-dialog">
-            <form class="modal-content" action="/parametres/ville/modifie" method="POST">
+            <form class="modal-content" action="/parametres/comptable/modifie" method="POST">
                 <div class="modal-header">
-                    <h5 class="modal-title">Edit City's Details</h5>
+                    <h5 class="modal-title">Edit Accountant's Details</h5>
                     <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">                    
                     <input name="id" type="hidden" value="">
-                    <div class="mb-0">
-                        <label class="form-label" for="name">Nom</label>
-                        <input class="form-control" name="name" id="name" type="text" value="" placeholder="">
+
+                    <div class="mb-3">
+                        <label class="form-label" for="designationInput">Designation</label>
+                        <input class="form-control" name="designation" id="designationInput" type="text" value="">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="codeInput">Code</label>
+                        <input class="form-control" name="code" id="codeInput" type="text" value="">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="acnInput">Nature</label>
+                        <input class="form-control" name="account_classification_number" id="acnInput" type="text" value="">
                     </div>
                 </div>
                 
@@ -63,15 +79,15 @@
 
     <div class="modal fade" id="removeEntryModal" tabindex="-1">
         <div class="modal-dialog">
-            <form class="modal-content" action="/parametres/ville/supprime" method="GET">
+            <form class="modal-content" action="/parametres/comptable/supprime" method="GET">
                 <div class="modal-header">
-                    <h5 class="modal-title">Confirm City's Deletion</h5>
+                    <h5 class="modal-title">Confirm Accountant's Deletion</h5>
                     <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
                 </div>
 
                 <div class="modal-body">
-                    <input name="id" type="hidden" value="">
-                    <p>Are you sure you want to delete <output></output> city?</p>
+                    <input name="id" id="removeEntryModal-idInput" type="hidden" value="">
+                    <p>Do you really want to delete <output id="removeEntryModal-designationOutput"></output>?</p>
                 </div>
                 
                 <div class="modal-footer">
@@ -81,6 +97,27 @@
             </form>
         </div>
     </div>
+
+    <!-- "Aside" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/aside.ejs') -%>
+
+    <!-- "Header" 
+    ----------------------------------------------------------------------->
+
+    <%- include('../partials/header.ejs', {
+            tabs: [
+                { title: 'Societe'        , url: '/parametres/societe'     }, 
+                { title: 'Ville'          , url: '/parametres/ville'       },
+                { title: 'Personnel'      , url: '/parametres/personnel'   },
+                { title: 'Plan Comptable' , url: '/parametres/comptable'   },
+                { title: 'Fournisseur'    , url: '/parametres/fournisseur' },
+                { title: 'Prime'          , url: '/parametres/prime'       },
+                { title: 'Cheque'         , url: '/parametres/cheque'      },
+                { title: 'Absence'        , url: '/parametres/absence'     }
+            ]
+        }); -%>
 
     <!-- "Main" 
     ----------------------------------------------------------------------->
@@ -98,10 +135,6 @@
         <% } %>
 
         <header class="mb-3 d-flex gap-3 justify-content-between align-items-baseline">
-
-            <!-- "Tableau Controls" 
-            ----------------------------------------------------------------------->
-
             <div class="d-flex gap-2">
 
                 <!-- "Add Button" 
@@ -114,17 +147,17 @@
                 <!-- "Search Bar" 
                 ----------------------------------------------------------------------->
                 
-                <div class="input-group">
+                <div class="input-group" id="searchBar">
                     <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                    <input class="form-control" name="search" id="searchBar" type="text" value="<%= baseUrl.searchParams.get('search') ?? '' %>" placeholder="Type a search...">
+                    <input class="form-control" name="search" id="searchBar-input" type="text" value="<%= baseUrl.searchParams.get('search') ?? '' %>" placeholder="Type a search...">
                 </div>
 
                 <!-- "Refresh Button" 
                 ----------------------------------------------------------------------->
                 
-                <button class="btn btn-light border" data-bs-toggle="tooltip" data-bs-title="Refresh">
+                <a class="btn btn-light border" href="/parametres/comptable" data-bs-toggle="tooltip" data-bs-title="Refresh">
                     <i class="bi bi-arrow-clockwise"></i>
-                </button>
+                </a>
             </div>
         </header>
 
@@ -134,29 +167,49 @@
         <table class="table table-sm table-bordered">
             <thead>
                 <tr>
-                    <th class="bg-light text-secondary">Nom</th>
+                    <th class="bg-light text-secondary">Designation</th>
+                    <th class="bg-light text-secondary">Code</th>
+                    <th class="bg-light text-secondary">Nature</th>
                     <th class="bg-light text-secondary">Action</th>
                 </tr>
             </thead>
             <tbody>
-                <% for(let city of cities) { %>
+                <% for(let accountant of accountants) { %>
                     <tr>
-                        <input name="id" type="hidden" value="<%= city.id %>" disabled>
+                        <input name="id" type="hidden" value="<%= accountant.id %>" disabled>
+                        <input name="designation" type="hidden" value="<%= accountant.designation %>" disabled>
                         <td>
-                            <%= city.name %>
-                            <input name="name" type="hidden" value="<%= city.name %>" data-designation disabled>
+                            <%= accountant.designation %>
+                            <input name="designation" type="hidden" value="<%= accountant.designation %>" disabled>
+                        </td>
+                        <td>
+                            <%= accountant.code %>
+                            <input name="code" type="hidden" value="<%= accountant.code %>" disabled>
+                        </td>
+                        <td>
+                            <%= accountant.account_classification_number %>
+                            <input name="account_classification_number" type="hidden" value="<%= accountant.account_classification_number %>" disabled>
                         </td>
                         <td>
                             <button class="btn btn-sm btn-secondary" 
                                     name="editEntryModalTrigger"
-                                    style="--bs-btn-padding-y: .2rem; --bs-btn-padding-x: .3rem; --bs-btn-font-size: .5rem; margin-bottom: 0.15rem;"
-                                    data-bs-toggle="tooltip" data-bs-title="Edit">
+                                    style="--bs-btn-padding-y: .2rem; 
+                                           --bs-btn-padding-x: .3rem; 
+                                           --bs-btn-font-size: .5rem; 
+                                             margin-bottom   : .15rem;"
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-title="Edit">
                                 <i class="bi bi-pencil-fill"></i>
                             </button>
+
                             <button class="btn btn-sm btn-danger" 
                                     name="removeEntryModalTrigger"
-                                    style="--bs-btn-padding-y: .2rem; --bs-btn-padding-x: .3rem; --bs-btn-font-size: .5rem; margin-bottom: 0.15rem;" 
-                                    data-bs-toggle="tooltip" data-bs-title="Remove">
+                                    style="--bs-btn-padding-y: .2rem; 
+                                           --bs-btn-padding-x: .3rem; 
+                                           --bs-btn-font-size: .5rem; 
+                                             margin-bottom   : .15rem;" 
+                                    data-bs-toggle="tooltip" 
+                                    data-bs-title="Remove">
                                 <i class="bi bi-trash3-fill"></i>
                             </button>
                         </td>
@@ -164,6 +217,9 @@
                 <% } %>
             </tbody>
         </table>
+
+        <!-- "Pagination" 
+        ----------------------------------------------------------------------->
 
         <% 
             let page = parseInt(baseUrl.searchParams.get('page') ?? 0, 10);
@@ -202,6 +258,7 @@
             </a>
         </div>
     </main>
-<%- include('../../partials/footer.ejs', {
-    scripts: [ '/public/scripts/settings/city/entryList.js' ]
+
+<%- include('../partials/footer.ejs', {
+    scripts: [ '/public/scripts/settings/entryList.js' ]
 }); -%>

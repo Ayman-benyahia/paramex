@@ -1,6 +1,5 @@
+const router = require('express').Router();
 const dbh = require('../utilities/dbh');
-const express = require('express');
-const router = express.Router();
 
 
 router.use((req, res, next) => {
@@ -12,8 +11,8 @@ router.use((req, res, next) => {
 });
 
 router.get('/', async (req, res) => {
-    let alert   = null, 
-        company = null;
+    let alert   = null;
+    let company = null;
 
     if(req.session.alert) {
         alert = req.session.alert;
@@ -22,18 +21,20 @@ router.get('/', async (req, res) => {
 
     try {
         const SQL_FETCH_COMPANY_DETAILS = `SELECT * FROM company LIMIT 1`;
-        let [ records ] = await dbh.query(SQL_FETCH_COMPANY_DETAILS, []);
+        let [records] = await dbh.query(SQL_FETCH_COMPANY_DETAILS, []);
+
         if(records.length <= 0) {
-            console.error(`[${new Date().toISOString()}] The 'company' table is empty. A company record must be created as one of the initial steps in system configuration.`);
             res.statusCode = 500;
             res.render('jumbotron', {
                 title: '500 Internal Server Error',
-                description: 'Required system configuration is incomplete. Please contact the administrator to resolve this issue.',
-                backURL: '/dashboard'
+                description: '',
+                backUrl: '/dashboard'
             });
             return;
         }
+
         company = records[0];
+
         res.render('settings/company', {
             baseUrl: new URL(`${req.protocol}://${req.get('host')}${req.originalUrl}`),
             user: req.session.user,
@@ -42,12 +43,12 @@ router.get('/', async (req, res) => {
         });
     }
     catch(error) {
-        console.error(`[${new Date().toISOString()}] Failed to fetch company data:`, error);
+        console.log(error);
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
-            description: 'An error occurred while retrieving necessary information. Please try again later or contact support if the issue continues.',
-            backURL: '/dashboard'
+            description: '',
+            backUrl: '/dashboard'
         });
     }
 });
@@ -83,7 +84,7 @@ router.post('/', async (req, res) => {
                    risk_rate                   = ?
             WHERE  id = ?`;
 
-        const [ results ] = await dbh.query(SQL_UPDATE_COMPANY_DETAILS, [
+        const [results] = await dbh.query(SQL_UPDATE_COMPANY_DETAILS, [
             id,
             name,
             company_registration_number,
@@ -106,12 +107,11 @@ router.post('/', async (req, res) => {
         res.redirect('/parametres/societe');
     }
     catch(error) {
-        console.error(`[${new Date().toISOString()}] Failed to update company details in database`, error);
         res.statusCode = 500;
         res.render('jumbotron', {
             title: '500 Internal Server Error',
-            description: 'An unexpected issue occurred while saving the company information. Please try again in a moment.',
-            backURL: '/dashboard'
+            description: '',
+            backUrl: '/dashboard'
         });
     }
 });

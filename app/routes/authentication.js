@@ -1,8 +1,7 @@
-const express = require('express');
-const { createHash } = require('crypto');
-const sendGmail = require('../utilities/sendGmail');
+const router = require('express').Router();
+const { createHash, randomUUID } = require('crypto');
 const dbh = require('../utilities/dbh');
-const router = express.Router();
+const sendGmail = require('../utilities/sendGmail');
 
 
 router.use('/connexion', (req, res, next) => {
@@ -14,8 +13,15 @@ router.use('/connexion', (req, res, next) => {
 });
 
 router.get('/connexion', (req, res) => {
+    let alert = null;
+
+    if(req.session.alert) {
+        alert = req.session.alert;
+        delete req.session.alert;
+    }
+
     res.render('login', {
-        alert: null,
+        alert: alert,
         isLoggedIn: false,
         fullname: '',
         password: ''
@@ -24,9 +30,10 @@ router.get('/connexion', (req, res) => {
 
 router.post('/connexion', async (req, res) => {
     const { fullname, password } = req.body;
+
     let alert = null;
-    let isLoggedIn = false;
     let employee = null;
+    let isLoggedIn = false;
 
     try {
         const SQL_FETCH_EMPLOYEE_JOINED_ROLES = `
@@ -34,21 +41,19 @@ router.post('/connexion', async (req, res) => {
             FROM       employee AS emp 
             INNER JOIN roles    AS rol 
             ON         emp.id   =  rol.employee_id 
-            WHERE      fullname = ?
+            WHERE      fullname =  ?
         `;
         const [records] = await dbh.query(
-            SQL_FETCH_EMPLOYEE_JOINED_ROLES, 
-            [ fullname ]
-        );
+            SQL_FETCH_EMPLOYEE_JOINED_ROLES, [ fullname ]);
 
         if(records.length > 0) {
             employee = records[0];
             let hashedPassword = createHash('sha256').update(password).digest('hex');
-            if((password === employee.password || hashedPassword === employee.password) && !alert) { 
+            if(hashedPassword === employee.password && !alert) { 
                 isLoggedIn = true;
                 alert = {
                     type: 'success',
-                    message: 'You have logged-in successfully! redirecting....'
+                    message: 'You have authenticated successfully! redirecting....'
                 };
             }
             else if(!alert) {
@@ -66,10 +71,9 @@ router.post('/connexion', async (req, res) => {
         }
     }
     catch(error) {
-        console.error(`[${new Date().toISOString()}] Error retrieving employee data and roles from the database.`, error);
         alert = { 
             type: 'danger', 
-            message: 'We couldn’t complete your request at the moment. Please try again later.' 
+            message: "We couldn't complete your request at the moment. Please try again later." 
         };
         return;
     }
@@ -79,7 +83,7 @@ router.post('/connexion', async (req, res) => {
         req.session.user = {
             id                         : employee.employee_id,
             fullname                   : employee.fullname,
-            position_type              : employee.position_type,
+            job_title                  : employee.job_title,
             is_deleted                 : employee.is_deleted, 
             is_archived                : employee.is_archived, 
             deletion_date              : employee.is_deletion_date, 
@@ -104,51 +108,128 @@ router.post('/connexion', async (req, res) => {
     });
 });
 
-router.get('/recuperation', async (req, res) => {
+
+router.get('/envoyer_code', async (req, res) => {
+
+    if(req.session.passwordResetCode) {
+        delete req.session.passwordResetCode;
+    }
+
+    if(req.session.alert) {
+        delete req.session.alert;
+    }
+
     try {
-        const SQL_FETCH_EMPLOYEE = `SELECT * FROM employee LIMIT 1`;
-        const [ records ] = await dbh.query(SQL_FETCH_EMPLOYEE, []);
-        var fullname = records[0].fullname;
-        var password = records[0].password;
+        let code = randomUUID();
+        req.session.passwordResetCode = code;
+
+        sendGmail({
+            username  : process.env.GMAIL_ADRESSE,
+            password  : process.env.GMAIL_APP_PASSWORD,
+            sender    : process.env.GMAIL_ADRESSE,
+            recipient : process.env.GMAIL_ADRESSE,
+            subject   : `Paramex - Changer votre mot de passe`,
+            html      : `
+                <p>Bonjour,</p>
+                <p>Pour changer votre mot de passe, veuillez cliquer sur le lien ci-dessous :</p>
+                <p>
+                    <a href="http://localhost:${process.env.PORT}/auth/changer_passe?code=${code}">
+                        Changer mon mot de passe.
+                    </a>
+                </p>
+                <p>Merci,<br>L'équipe Paramex</p>
+            `
+        }, 
+        (info, error) => {
+            if(error) throw error;
+
+            req.session.alert = {
+                type: 'info',
+                message: 'Reset password email has been sent, please open your mailbox.'
+            }
+            res.redirect('/auth/connexion');
+        });
     }
     catch(error) {
-        console.error(`[${new Date().toISOString()}] Error retrieving employee data from the database.`, error);
+        res.statusCode = 500;
         res.render('jumbotron', {
             title : '500 Internal Server Error',
-            description : 'We’re unable to retrieve the necessary information right now.',
-            backURL : '/auth/connexion'
+            description : '',
+            backUrl : '/auth/connexion'
         });
+    }
+});
+
+router.get('/changer_passe', async(req, res) => {
+    const { code } = req.query;
+    let alert = null;
+
+    if(!code) {
+        res.redirect('/auth/connexion');
         return;
     }
 
-    sendGmail({
-        username  : process.env.GMAIL_ADRESSE,
-        password  : process.env.GMAIL_APP_PASSWORD,
-        sender    : process.env.GMAIL_ADRESSE,
-        recipient : process.env.GMAIL_ADRESSE,
-        subject   : `Paramex Account's password recovery`,
-        text      : `Full Name: ${fullname}\nPassword: ${password}`
-    }, 
-    (info, error) => {
-        if(error) { 
-            console.error(`[${new Date().toISOString()}] Email sending failed for "${recipient}":`, error);
-            res.render('jumbotron', {
-                title : '500 Internal Server Error',
-                description : 'Something unusual happened while trying to continue.',
-                backURL : '/auth/connexion'
-            }); 
+    if(req.session.alert) {
+        alert = req.session.alert;
+        delete req.session.alert;
+    }
+
+    try {
+        res.render('changePassword', { alert, code });
+    }
+    catch(error) {
+        res.statusCode = 500;
+        res.render('jumbotron', {
+            title : '500 Internal Server Error',
+            description : '',
+            backUrl : '/auth/connexion'
+        });
+    }
+});
+
+router.post('/changer_passe', async (req, res) => {
+    const { code, new_password } = req.body;
+
+    if(!req.session.passwordResetCode || 
+        req.session.passwordResetCode !== code) {
+    
+        req.session.alert = {
+            type: 'danger',
+            message: 'The Reset password code is invalid, Please try again.'
+        };
+        res.redirect('/auth/changer_passe');
+        return;
+    }
+
+    try {
+        let hashedPassword = createHash('sha256').update(new_password).digest('hex');
+        const SQL_UPDATE_ADMIN_PASSWORD = `UPDATE employee SET password = ? ORDER BY id LIMIT 1`;
+        const [result] = await dbh.query(SQL_UPDATE_ADMIN_PASSWORD, [ hashedPassword ]);
+
+        if(result.affectedRows === 0) {
+            req.session.alert = {
+               type: 'warning',
+               message: 'The password was updated, Please try again.'
+            };
+            res.redirect('/auth/changer_password');
             return;
         }
-        
-        console.log(`[${new Date().toISOString()}] Email dispatched to "${process.env.GMAIL_ADRESSE}" — Message ID: ${info.messageId}`);
 
+        req.session.alert = {
+            type: 'success',
+            message: 'The password was reset with success, Redirecting...'
+        };
+        res.redirect('/auth/connexion');
+    } 
+    catch(error) {
         res.render('jumbotron', {
-            title : 'Account Recovery',
-            description : `An email has been sent to the administrator's address. Please wait a few moments, and if nothing happens, you can <a href="/">retry here</a>`,
-            backURL : '/auth/connexion'
+            title : '500 Internal Server Error',
+            description : '',
+            backUrl : '/auth/connexion'
         });
-    });
+    }
 });
+
 
 router.use((req, res, next) => {
     if(!req.session || !req.session.user) { 
@@ -161,15 +242,15 @@ router.use((req, res, next) => {
 router.get('/deconnexion', (req, res) => {
     req.session.destroy((error) => {
         if(error) {
-            console.error(`[${new Date().toISOString()}] Failed to destroy session`, error);
             res.statusCode = 500;
             res.render('jumbotron', {
                 title : '500 Internal Server Error',
-                description : 'We were unable to complete the sign out process.',
-                backURL : '/auth/connexion'
+                description : '',
+                backUrl : '/auth/connexion'
             });
             return;
         }
+
         res.redirect('/auth/connexion');
     });
 });
